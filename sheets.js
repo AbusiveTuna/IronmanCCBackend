@@ -13,26 +13,25 @@ const doc = new GoogleSpreadsheet('1HUIruK6tVZziYXZOMDDL99HEwQh508BKpB5uZBdUtCo'
 
 const updateGoogleSheet = async (latestResults, teamTotals) => {
     try {
+        await doc.loadInfo(); 
 
-        await doc.loadInfo();
-        console.log(doc.title);
+        let sheet = doc.sheetsByTitle["TunaTest"];
 
-        const sheet = doc.sheetsByTitle["TunaTest"];
-
+        const headers = Object.keys(teamTotals);
         const rows = Object.keys(teamTotals).map(teamName => ({
-            "Team Name": teamName,
-            "Score": teamTotals[teamName]
-        }));//
+            [teamName]: teamTotals[teamName]
+        }));
+
 
         if (!sheet) {
-            sheet = await doc.addSheet({ title: "TunaTest" });
-            await sheet.setHeaderRow(['Team 1', 'Team 2']);
+            sheet = await doc.addSheet({ title: "TunaTest", headerValues: headers });
         } else {
             await sheet.clear();
-            await sheet.setHeaderRow(['Team 1', 'Team 2']);
+            await sheet.setHeaderRow(headers); 
         }
 
-        await sheet.addRows(rows); 
+        console.log("Adding rows with dynamic headers");
+        await sheet.addRows(rows);
 
         for (const skill in latestResults) {
             let sheet = doc.sheetsByTitle[skill];
