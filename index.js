@@ -23,6 +23,7 @@ const fetchCompetitionInfo = async (compId) => {
     let results = {};
     for (const skill of templeSkills) {
         try {
+            console.log("Fetching data for " + skill);
             const response = await axios.get(`https://templeosrs.com/api/competition_info.php?id=${compId}&skill=${skill}`);
             const data = response.data.data;
 
@@ -159,7 +160,7 @@ app.get('/teamTotals/:compId', async (req, res) => {
     }
 });
 
-app.get('fetchTempleData/:compId', async (req,res) => {
+app.get('fetchTempleData', async (req,res) => {
     if (isFetching) {
         res.status(200).send("Fetch already running");
     }
