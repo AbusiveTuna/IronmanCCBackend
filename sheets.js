@@ -13,25 +13,28 @@ const doc = new GoogleSpreadsheet('1HUIruK6tVZziYXZOMDDL99HEwQh508BKpB5uZBdUtCo'
 
 const updateGoogleSheet = async (latestResults, teamTotals) => {
     try {
-        await doc.loadInfo(); 
+        await doc.loadInfo();  // Load the document properties and worksheets
+        console.log("Document Title:", doc.title);
 
         let sheet = doc.sheetsByTitle["TunaTest"];
 
-        const headers = Object.keys(teamTotals);
-        const rows = Object.keys(teamTotals).map(teamName => ({
-            [teamName]: teamTotals[teamName]
-        }));
-
+        const teamNames = Object.keys(teamTotals);
+        const headers = [''].concat(teamNames);
 
         if (!sheet) {
             sheet = await doc.addSheet({ title: "TunaTest", headerValues: headers });
         } else {
-            await sheet.clear();
-            await sheet.setHeaderRow(headers); 
+            await sheet.clear(); 
+            await sheet.setHeaderRow(headers);  
         }
 
-        console.log("Adding rows with dynamic headers");
-        await sheet.addRows(rows);
+        const pointsRow = { '': 'Total Points:' };
+        teamNames.forEach(teamName => {
+            pointsRow[teamName] = teamTotals[teamName];
+        });
+
+        console.log("Setting row with total points");
+        await sheet.addRow(pointsRow); 
 
         for (const skill in latestResults) {
             let sheet = doc.sheetsByTitle[skill];
