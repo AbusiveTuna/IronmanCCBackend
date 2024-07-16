@@ -1,6 +1,7 @@
 import express from 'express';
 import axios from 'axios';
 import { templeMap } from './resources/2024_templeMap.js';
+import { updateGoogleSheet } from './sheets.js';
 import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults  } from './database.js';
 
 const app = express();
@@ -47,6 +48,8 @@ const fetchCompetitionInfo = async (compId) => {
     }
 
     await saveTempleData(compId, results);
+
+    updateGoogleSheet(results);
     isFetching = false;
 };
 
@@ -160,7 +163,7 @@ app.get('/teamTotals/:compId', async (req, res) => {
     }
 });
 
-app.get('fetchTempleData', async (req,res) => {
+app.get('/fetchTempleData', async (req,res) => {
     if (isFetching) {
         res.status(200).send("Fetch already running");
     }
