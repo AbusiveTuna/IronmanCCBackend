@@ -18,10 +18,37 @@ const updateGoogleSheet = async (latestResults, teamTotals) => {
         console.log(doc.title);
 
         const sheet = doc.sheetsByTitle["TunaTest"];
-        console.log(teamTotals);
-        console.log("SPACE");
-        console.log(latestResults);
-        await sheet.addRows(data);
+
+        const rows = Object.keys(teamTotals).map(teamName => ({
+            "Team Name": teamName,
+            "Score": teamTotals[teamName]
+        }));
+
+        await sheet.addRows(rows); 
+
+        for (const skill in latestResults) {
+            let sheet = doc.sheetsByTitle[skill];
+
+            if (!sheet) {
+                sheet = await doc.addSheet({ title: skill, headerValues: ['Player Name', 'Team Name', 'XP Gained', 'Points'] });
+            } else {
+                await sheet.clear();
+
+                await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']);
+            }
+
+            
+            const rows = latestResults[skill].map(player => ({
+                'Player Name': player.playerName,
+                'Team Name': player.teamName,
+                'XP Gained': player.xpGained,
+                'Points': player.points
+            }));
+
+            
+            await sheet.addRows(rows);
+        }
+
     } catch (error) {
         console.error('Failed to update Google Sheet:', error);
     }
