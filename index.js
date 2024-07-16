@@ -170,6 +170,7 @@ app.get('fetchTempleData/:compId', async (req,res) => {
 });
 
 app.listen(port, async () => {
+    console.log("Running on port: " + port);
     await createTable();
     getTempleSkills();
 
