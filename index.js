@@ -4,7 +4,7 @@ import { templeMap } from './resources/2024_templeMap.js';
 import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults  } from './database.js';
 
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 let templeSkills = [];
 let isFetching = false;

@@ -2,11 +2,10 @@ import pkg from 'pg';
 const { Pool } = pkg;
 
 const pool = new Pool({
-    user: 'test',
-    host: 'localhost',
-    database: 'ironmancc',
-    password: 'test',
-    port: 5432,
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 const createTable = async () => {
