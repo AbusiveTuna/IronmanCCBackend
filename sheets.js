@@ -24,17 +24,25 @@ const updateGoogleSheet = async (latestResults, teamTotals) => {
             "Score": teamTotals[teamName]
         }));
 
+        if (!sheet) {
+            sheet = await doc.addSheet({ title: "TunaTest" });
+            await sheet.setHeaderRow(['Team 1', 'Team 2']);
+        } else {
+            await sheet.clear();
+            await sheet.setHeaderRow(['Team 1', 'Team 2']);
+        }
+
         await sheet.addRows(rows); 
 
         for (const skill in latestResults) {
             let sheet = doc.sheetsByTitle[skill];
 
             if (!sheet) {
-                sheet = await doc.addSheet({ title: skill, headerValues: ['Player Name', 'Team Name', 'XP Gained', 'Points'] });
+                sheet = await doc.addSheet({ title: skill });
+                await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']);
             } else {
                 await sheet.clear();
-
-                await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']);
+                await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']); 
             }
 
             
