@@ -22,7 +22,7 @@ const updateGoogleSheet = async (latestResults, teamTotals) => {
         const rows = Object.keys(teamTotals).map(teamName => ({
             "Team Name": teamName,
             "Score": teamTotals[teamName]
-        }));
+        }));//
 
         if (!sheet) {
             sheet = await doc.addSheet({ title: "TunaTest" });
