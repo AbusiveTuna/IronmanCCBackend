@@ -1,7 +1,7 @@
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 
 const creds = process.env.GOOGLE_CREDS;
-const credsJSON = JSON.parse(Buffer.from(credsEncoded, 'base64').toString());
+const credsJSON = JSON.parse(Buffer.from(creds, 'base64').toString());
 
 const doc = new GoogleSpreadsheet('1HUIruK6tVZziYXZOMDDL99HEwQh508BKpB5uZBdUtCo');
 
