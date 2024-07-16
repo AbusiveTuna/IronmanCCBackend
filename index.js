@@ -48,8 +48,7 @@ const fetchCompetitionInfo = async (compId) => {
     }
 
     await saveTempleData(compId, results);
-
-    updateGoogleSheet(results);
+    
     isFetching = false;
 };
 
@@ -120,6 +119,7 @@ const fetchAndProcessData = async () => {
     const teamTotals = getTeamTotals(latestResults);
 
     await saveCompetitionResults(23801, latestResults, teamTotals);
+    updateGoogleSheet(latestResults, teamTotals);
 };
 
 app.get('/results/:compId', async (req, res) => {

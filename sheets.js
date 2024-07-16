@@ -11,14 +11,16 @@ const serviceAccountAuth = new JWT({
 
 const doc = new GoogleSpreadsheet('1HUIruK6tVZziYXZOMDDL99HEwQh508BKpB5uZBdUtCo', serviceAccountAuth);
 
-const updateGoogleSheet = async (data) => {
+const updateGoogleSheet = async (latestResults, teamTotals) => {
     try {
 
         await doc.loadInfo();
         console.log(doc.title);
 
         const sheet = doc.sheetsByTitle["TunaTest"];
-        console.log(sheet.title);
+        console.log(teamTotals);
+        console.log("SPACE");
+        console.log(latestResults);
         await sheet.addRows(data);
     } catch (error) {
         console.error('Failed to update Google Sheet:', error);
