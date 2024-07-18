@@ -13,53 +13,61 @@ const doc = new GoogleSpreadsheet('1HUIruK6tVZziYXZOMDDL99HEwQh508BKpB5uZBdUtCo'
 
 const updateGoogleSheet = async (latestResults, teamTotals) => {
     try {
+        console.log("Attempting to grab google sheets info");
         await doc.loadInfo();
-
-        let sheet = doc.sheetsByTitle["TunaTest"];
-        const teamNames = Object.keys(teamTotals);
-        const headers = ['', ...teamNames]; 
-
-        if (!sheet) {
-            sheet = await doc.addSheet({ title: "TunaTest" });
-            await sheet.setHeaderRow(headers);
-        } else {
-            await sheet.clear();
-            await sheet.setHeaderRow(headers);
-        }
-
-       
-        const pointsRow = ['Total Points:']; 
-        teamNames.forEach(teamName => {
-            pointsRow.push(teamTotals[teamName]); 
-        });
-
-        await sheet.addRow(pointsRow); 
-
-        for (const skill in latestResults) {
-            let sheet = doc.sheetsByTitle[skill];
-
-            if (!sheet) {
-                sheet = await doc.addSheet({ title: skill });
-                await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']);
-            } else {
-                await sheet.clear();
-                await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']); 
-            }
-
-            
-            const rows = latestResults[skill].map(player => ({
-                'Player Name': player.playerName,
-                'Team Name': player.teamName,
-                'XP Gained': player.xpGained,
-                'Points': player.points
-            }));
-
-            
-            await sheet.addRows(rows);
-        }
-
+        console.log("Success! Updating Team Totals");
+        await updateTeamTotals(teamTotals);
+        console.log("Success! Updating Skill Sheets");
+        await updateSkillSheets(latestResults);
     } catch (error) {
         console.error('Failed to update Google Sheet:', error);
+    }
+};
+
+const updateTeamTotals = async(teamTotals) => {
+    let sheet = doc.sheetsByTitle["TunaTest"];
+    const teamNames = Object.keys(teamTotals);
+    const headers = ['', ...teamNames]; 
+
+    if (!sheet) {
+        sheet = await doc.addSheet({ title: "TunaTest" });
+        await sheet.setHeaderRow(headers);
+    } else {
+        await sheet.clear();
+        await sheet.setHeaderRow(headers);
+    }
+
+   
+    const pointsRow = ['Total Points:']; 
+    teamNames.forEach(teamName => {
+        pointsRow.push(teamTotals[teamName]); 
+    });
+
+    await sheet.addRow(pointsRow); 
+};
+
+const updateSkillSheets = async (latestResults) => {
+    for (const skill in latestResults) {
+        let sheet = doc.sheetsByTitle[skill];
+
+        if (!sheet) {
+            sheet = await doc.addSheet({ title: skill });
+            await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']);
+        } else {
+            await sheet.clear();
+            await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']); 
+        }
+
+        
+        const rows = latestResults[skill].map(player => ({
+            'Player Name': player.playerName,
+            'Team Name': player.teamName,
+            'XP Gained': player.xpGained,
+            'Points': player.points
+        }));
+
+        
+        await sheet.addRows(rows);
     }
 };
 
