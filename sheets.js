@@ -17,20 +17,20 @@ const updateGoogleSheet = async (latestResults, teamTotals) => {
         await doc.loadInfo();
         console.log("Success! Updating Team Totals");
         await updateTeamTotals(teamTotals);
-        console.log("Success! Updating Skill Sheets");
-        await updateSkillSheets(latestResults);
+        // console.log("Success! Updating Skill Sheets");
+        // await updateSkillSheets(latestResults);
     } catch (error) {
         console.error('Failed to update Google Sheet:', error);
     }
 };
 
 const updateTeamTotals = async(teamTotals) => {
-    let sheet = doc.sheetsByTitle["TunaTest"];
+    let sheet = doc.sheetsByTitle["TunaTotal"];
     const teamNames = Object.keys(teamTotals);
     const headers = ['', ...teamNames]; 
 
     if (!sheet) {
-        sheet = await doc.addSheet({ title: "TunaTest" });
+        sheet = await doc.addSheet({ title: "TunaTotal" });
         await sheet.setHeaderRow(headers);
     } else {
         await sheet.clear();
