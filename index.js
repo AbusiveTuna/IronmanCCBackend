@@ -58,6 +58,8 @@ const getAndSortLatestResults = async () => {
 
     for (const skillIndex in latestResults) {
         if (Array.isArray(latestResults[skillIndex])) {
+            latestResults[skillIndex] = latestResults[skillIndex].filter(player => player.xpGained > 0);
+
             latestResults[skillIndex].sort((a, b) => b.xpGained - a.xpGained);
 
             let topPlayers = [];
