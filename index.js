@@ -6,7 +6,7 @@ import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResult
 
 const app = express();
 const port = process.env.PORT || 3000;
-const compId = 24737; //26996;
+const compId = 24737 //26996;
 
 let templeSkills = [];
 let isFetching = false;
@@ -55,6 +55,30 @@ const fetchCompetitionInfo = async () => {
 
 const getAndSortLatestResults = async () => {
     const latestResults = await getLatestTempleData(compId);
+
+    // Combining Dagannoth categories
+    const dagannothIndices = ['46', '47', '48'];  // Assuming these are the skill indices for the Dagannoths
+    const combinedDagannoth = [];
+
+    // Collect data for all Dagannoth categories
+    dagannothIndices.forEach(skillIndex => {
+        if (latestResults[skillIndex]) {
+            latestResults[skillIndex].forEach(player => {
+                const existingPlayer = combinedDagannoth.find(p => p.playerName === player.playerName);
+                if (existingPlayer) {
+                    existingPlayer.xpGained += player.xpGained;
+                } else {
+                    combinedDagannoth.push({...player});
+                }
+            });
+            delete latestResults[skillIndex]; // Remove the individual Dagannoth category
+        }
+    });
+
+    // Add combined Dagannoth category
+    if (combinedDagannoth.length > 0) {
+        latestResults['Dagannoth'] = combinedDagannoth;
+    }
 
     for (const skillIndex in latestResults) {
         if (Array.isArray(latestResults[skillIndex])) {
@@ -119,10 +143,6 @@ const fetchAndProcessData = async () => {
     console.log("Starting Temple Fetch");
     await fetchCompetitionInfo();
     let latestResults = await getAndSortLatestResults();
-
-    // Combine Dagannoth categories
-    latestResults = combineDagannothCategories(latestResults);
-
     latestResults = assignPoints(latestResults);
     const teamTotals = getTeamTotals(latestResults);
 
@@ -130,46 +150,6 @@ const fetchAndProcessData = async () => {
 
     updateGoogleSheet(latestResults, teamTotals);
 };
-
-const combineDagannothCategories = (results) => {
-    const dagannothSkills = ['Dagannoth_Rex', 'Dagannoth_Prime', 'Dagannoth_Supreme'];
-    const combinedDagannothResults = [];
-
-    // Create a map to track combined XP for each player across Dagannoth categories
-    const playerXpMap = new Map();
-
-    dagannothSkills.forEach(skill => {
-        if (results[skill]) {
-            results[skill].forEach(player => {
-                if (playerXpMap.has(player.playerName)) {
-                    playerXpMap.set(player.playerName, playerXpMap.get(player.playerName) + player.xpGained);
-                } else {
-                    playerXpMap.set(player.playerName, player.xpGained);
-                }
-            });
-            delete results[skill]; // Remove individual Dagannoth results
-        }
-    });
-
-    // Convert the XP map to a results array format
-    for (const [playerName, xpGained] of playerXpMap.entries()) {
-        combinedDagannothResults.push({
-            playerName: playerName,
-            xpGained: xpGained,
-            points: 0  // Initialize points to 0; they will be reassigned later
-        });
-    }
-
-    // If there are combined results, sort them and add to main results under a new "Dagannoth" key
-    if (combinedDagannothResults.length > 0) {
-        combinedDagannothResults.sort((a, b) => b.xpGained - a.xpGained);  // Sort players by xpGained in descending order
-        results['Dagannoth'] = combinedDagannothResults;
-    }
-
-    return results;
-};
-
-
 
 app.get('/results', async (req, res) => {
     try {
