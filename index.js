@@ -1,3 +1,5 @@
+
+
 import express from 'express';
 import axios from 'axios';
 import { templeMap } from './resources/2024_templeMap.js';
@@ -18,11 +20,6 @@ const combinedSkillsMap = {
 
 const getTempleSkills = () => {
     templeSkills = templeMap.map(row => row[row.length - 1]);
-
-    // Add combined categories to templeSkills
-    for (const combinedSkill in combinedSkillsMap) {
-        templeSkills.push(combinedSkill);
-    }
 };
 
 const fetchCompetitionInfo = async () => {
@@ -34,31 +31,11 @@ const fetchCompetitionInfo = async () => {
 
     let results = {};
     for (const skill of templeSkills) {
-        if (combinedSkillsMap[skill]) {
-            for (const subSkill of combinedSkillsMap[skill]) {
-                await fetchSkillData(subSkill, results);
-            }
-        } else {
-            await fetchSkillData(skill, results);
-        }
+        await fetchSkillData(skill, results);
     }
 
-    // Combine results for combined skills
-    for (const combinedSkill in combinedSkillsMap) {
-        results[combinedSkill] = [];
-        for (const subSkill of combinedSkillsMap[combinedSkill]) {
-            if (results[subSkill]) {
-                results[subSkill].forEach(participant => {
-                    const existingParticipant = results[combinedSkill].find(p => p.playerName === participant.playerName);
-                    if (existingParticipant) {
-                        existingParticipant.xpGained += participant.xpGained;
-                    } else {
-                        results[combinedSkill].push({ ...participant });
-                    }
-                });
-            }
-        }
-    }
+    // Manually combine Dagannoth Prime, Rex, and Supreme into Combined_DKS
+    combineDKSResults(results);
 
     await saveTempleData(compId, results);
     isFetching = false;
@@ -70,13 +47,12 @@ const fetchSkillData = async (skill, results) => {
         const response = await axios.get(`https://templeosrs.com/api/competition_info.php?id=${compId}&skill=${skill}`);
         const data = response.data.data;
 
-        const skillIndex = data.info.skill;
-        if (!results[skillIndex]) {
-            results[skillIndex] = [];
+        if (!results[skill]) {
+            results[skill] = [];
         }
 
         data.participants.forEach(participant => {
-            results[skillIndex].push({
+            results[skill].push({
                 playerName: participant.username,
                 xpGained: participant.xp_gained,
                 teamName: participant.team_name
@@ -87,6 +63,24 @@ const fetchSkillData = async (skill, results) => {
         console.error(`Error fetching data for skill ${skill}:`, error);
     }
     await new Promise(resolve => setTimeout(resolve, 10000));
+};
+
+const combineDKSResults = (results) => {
+    const combinedSkill = "Combined_DKS";
+    results[combinedSkill] = [];
+
+    for (const subSkill of combinedSkillsMap[combinedSkill]) {
+        if (results[subSkill]) {
+            results[subSkill].forEach(participant => {
+                const existingParticipant = results[combinedSkill].find(p => p.playerName === participant.playerName);
+                if (existingParticipant) {
+                    existingParticipant.xpGained += participant.xpGained;
+                } else {
+                    results[combinedSkill].push({ ...participant });
+                }
+            });
+        }
+    }
 };
 
 const getAndSortLatestResults = async () => {
