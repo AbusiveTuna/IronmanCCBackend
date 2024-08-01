@@ -151,10 +151,30 @@ const getTeamTotals = (results) => {
 const fetchAndProcessData = async () => {
     console.log("Starting Temple Fetch");
     await fetchCompetitionInfo();
+    
     let latestResults = await getAndSortLatestResults();
-    latestResults = assignPoints(latestResults);
+
+    // Separate combined Dagannoth results processing
+    if (latestResults["Combined_DKS"]) {
+        let combinedResults = assignPoints({ "Combined_DKS": latestResults["Combined_DKS"] });
+        latestResults["Combined_DKS"] = combinedResults["Combined_DKS"];
+    }
+
+    // Assign points to other skills
+    const otherResults = Object.keys(latestResults).reduce((acc, key) => {
+        if (key !== "Combined_DKS" && dagannothIndices.every(idx => key !== `Dagannoth_${idx}`)) {
+            acc[key] = latestResults[key];
+        }
+        return acc;
+    }, {});
+    let nonCombinedResults = assignPoints(otherResults);
+
+    // Combine all results for saving and further processing
+    latestResults = { ...nonCombinedResults, "Combined_DKS": latestResults["Combined_DKS"] };
+
     const teamTotals = getTeamTotals(latestResults);
 
+    // Save results, including the combined Dagannoth data and other skills
     await saveCompetitionResults(compId, latestResults, teamTotals);
 
     updateGoogleSheet(latestResults, teamTotals);
