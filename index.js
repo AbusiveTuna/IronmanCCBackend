@@ -133,30 +133,42 @@ const fetchAndProcessData = async () => {
 
 const combineDagannothCategories = (results) => {
     const dagannothSkills = ['Dagannoth_Rex', 'Dagannoth_Prime', 'Dagannoth_Supreme'];
-    const combinedDagannothResults = {};
+    const combinedDagannothResults = [];
 
-    // Collect all Dagannoth data into a single object with players as keys
+    // Create a map to track combined XP for each player across Dagannoth categories
+    const playerXpMap = new Map();
+
     dagannothSkills.forEach(skill => {
         if (results[skill]) {
             results[skill].forEach(player => {
-                if (!combinedDagannothResults[player.playerName]) {
-                    combinedDagannothResults[player.playerName] = {
-                        playerName: player.playerName,
-                        xpGained: 0, // Initialize xpGained
-                        points: 0 // Initialize points, which will be recalculated
-                    };
+                if (playerXpMap.has(player.playerName)) {
+                    playerXpMap.set(player.playerName, playerXpMap.get(player.playerName) + player.xpGained);
+                } else {
+                    playerXpMap.set(player.playerName, player.xpGained);
                 }
-                combinedDagannothResults[player.playerName].xpGained += player.xpGained;
             });
-            delete results[skill]; // Remove the processed Dagannoth skill results
+            delete results[skill]; // Remove individual Dagannoth results
         }
     });
 
-    // Convert the combined results object back to an array format
-    results['Dagannoth'] = Object.values(combinedDagannothResults);
+    // Convert the XP map to a results array format
+    for (const [playerName, xpGained] of playerXpMap.entries()) {
+        combinedDagannothResults.push({
+            playerName: playerName,
+            xpGained: xpGained,
+            points: 0  // Initialize points to 0; they will be reassigned later
+        });
+    }
+
+    // If there are combined results, sort them and add to main results under a new "Dagannoth" key
+    if (combinedDagannothResults.length > 0) {
+        combinedDagannothResults.sort((a, b) => b.xpGained - a.xpGained);  // Sort players by xpGained in descending order
+        results['Dagannoth'] = combinedDagannothResults;
+    }
 
     return results;
 };
+
 
 
 app.get('/results', async (req, res) => {
