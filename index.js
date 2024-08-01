@@ -2,7 +2,7 @@ import express from 'express';
 import axios from 'axios';
 import { templeMap } from './resources/2024_templeMap.js';
 import { updateGoogleSheet } from './sheets.js';
-import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults  } from './database.js';
+import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults } from './database.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -20,7 +20,7 @@ const fetchCompetitionInfo = async () => {
         console.log("Fetch operation already in progress...");
         return;
     }
-    isFetching = true; 
+    isFetching = true;
 
     let results = {};
     for (const skill of templeSkills) {
@@ -48,9 +48,40 @@ const fetchCompetitionInfo = async () => {
         await new Promise(resolve => setTimeout(resolve, 10000));
     }
 
+    results = combineDagannothResults(results);
+
     await saveTempleData(compId, results);
     
     isFetching = false;
+};
+
+const combineDagannothResults = (results) => {
+    const dagannothSkills = ["Dagannoth_Rex", "Dagannoth_Prime", "Dagannoth_Supreme"];
+    const combinedResults = {};
+    const combinedSkill = "Combined_DKS";
+
+    dagannothSkills.forEach(skill => {
+        if (results[skill]) {
+            results[skill].forEach(player => {
+                if (!combinedResults[player.playerName]) {
+                    combinedResults[player.playerName] = {
+                        playerName: player.playerName,
+                        xpGained: 0,
+                        teamName: player.teamName
+                    };
+                }
+                combinedResults[player.playerName].xpGained += player.xpGained;
+            });
+        }
+    });
+
+    results[combinedSkill] = Object.values(combinedResults);
+
+    dagannothSkills.forEach(skill => {
+        delete results[skill];
+    });
+
+    return results;
 };
 
 const getAndSortLatestResults = async () => {
@@ -153,7 +184,6 @@ app.get('/results/:skillName', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 app.get('/teamTotals', async (req, res) => {
     try {
