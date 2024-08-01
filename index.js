@@ -56,9 +56,9 @@ const fetchCompetitionInfo = async () => {
 };
 
 const combineDagannothResults = (results) => {
-    const dagannothSkills = ["Dagannoth_Rex", "Dagannoth_Prime", "Dagannoth_Supreme"];
     const combinedResults = {};
     const combinedSkill = "Combined_DKS";
+    const dagannothSkills = ["Dagannoth_Rex", "Dagannoth_Prime", "Dagannoth_Supreme"];
 
     dagannothSkills.forEach(skill => {
         if (results[skill]) {
@@ -77,6 +77,7 @@ const combineDagannothResults = (results) => {
 
     results[combinedSkill] = Object.values(combinedResults);
 
+    // Remove original Dagannoth skills from results
     dagannothSkills.forEach(skill => {
         delete results[skill];
     });
@@ -198,11 +199,10 @@ app.get('/teamTotals', async (req, res) => {
     }
 });
 
-app.get('/fetchTempleData', async (req,res) => {
+app.get('/fetchTempleData', async (req, res) => {
     if (isFetching) {
         res.status(200).send("Fetch already running");
-    }
-    else {
+    } else {
         fetchAndProcessData();
         res.status(200).send("Fetch started");
     }
