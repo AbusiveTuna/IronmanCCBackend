@@ -2,12 +2,11 @@ import express from 'express';
 import axios from 'axios';
 import { templeMap } from './resources/2024_templeMap.js';
 import { updateGoogleSheet } from './sheets.js';
-import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults  } from './database.js';
+import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults } from './database.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
-// const compId = 26996;
-const compId = 24737;
+const compId = 24737 //26996;
 
 let templeSkills = [];
 let isFetching = false;
@@ -31,38 +30,53 @@ const fetchCompetitionInfo = async () => {
         console.log("Fetch operation already in progress...");
         return;
     }
-    isFetching = true; 
+    isFetching = true;
 
     let results = {};
     for (const skill of templeSkills) {
         if (combinedSkillsMap[skill]) {
-            results[skill] = [];
             for (const subSkill of combinedSkillsMap[skill]) {
-                await fetchSkillData(subSkill, results[skill]);
+                await fetchSkillData(subSkill, results);
             }
         } else {
-            await fetchSkillData(skill, results[skill]);
+            await fetchSkillData(skill, results);
+        }
+    }
+
+    // Combine results for combined skills
+    for (const combinedSkill in combinedSkillsMap) {
+        results[combinedSkill] = [];
+        for (const subSkill of combinedSkillsMap[combinedSkill]) {
+            if (results[subSkill]) {
+                results[subSkill].forEach(participant => {
+                    const existingParticipant = results[combinedSkill].find(p => p.playerName === participant.playerName);
+                    if (existingParticipant) {
+                        existingParticipant.xpGained += participant.xpGained;
+                    } else {
+                        results[combinedSkill].push({ ...participant });
+                    }
+                });
+            }
         }
     }
 
     await saveTempleData(compId, results);
-    
     isFetching = false;
 };
 
-const fetchSkillData = async (skill, resultArray) => {
+const fetchSkillData = async (skill, results) => {
     try {
         console.log("Fetching data for " + skill);
         const response = await axios.get(`https://templeosrs.com/api/competition_info.php?id=${compId}&skill=${skill}`);
         const data = response.data.data;
 
         const skillIndex = data.info.skill;
-        if (!resultArray[skillIndex]) {
-            resultArray[skillIndex] = [];
+        if (!results[skillIndex]) {
+            results[skillIndex] = [];
         }
 
         data.participants.forEach(participant => {
-            resultArray.push({
+            results[skillIndex].push({
                 playerName: participant.username,
                 xpGained: participant.xp_gained,
                 teamName: participant.team_name
