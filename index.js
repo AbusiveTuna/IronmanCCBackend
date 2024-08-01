@@ -1,22 +1,15 @@
-
-
 import express from 'express';
 import axios from 'axios';
 import { templeMap } from './resources/2024_templeMap.js';
 import { updateGoogleSheet } from './sheets.js';
-import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults } from './database.js';
+import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults  } from './database.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
-const compId = 24737 //26996;
+const compId = 24737; //26996;
 
 let templeSkills = [];
 let isFetching = false;
-
-// Define combined categories
-const combinedSkillsMap = {
-    "Combined_DKS": ["Dagannoth_Prime", "Dagannoth_Rex", "Dagannoth_Supreme"]
-};
 
 const getTempleSkills = () => {
     templeSkills = templeMap.map(row => row[row.length - 1]);
@@ -27,60 +20,37 @@ const fetchCompetitionInfo = async () => {
         console.log("Fetch operation already in progress...");
         return;
     }
-    isFetching = true;
+    isFetching = true; 
 
     let results = {};
     for (const skill of templeSkills) {
-        await fetchSkillData(skill, results);
-    }
+        try {
+            console.log("Fetching data for " + skill);
+            const response = await axios.get(`https://templeosrs.com/api/competition_info.php?id=${compId}&skill=${skill}`);
+            const data = response.data.data;
 
-    // Manually combine Dagannoth Prime, Rex, and Supreme into Combined_DKS
-    combineDKSResults(results);
+            const skillIndex = data.info.skill;
+            if (!results[skillIndex]) {
+                results[skillIndex] = [];
+            }
+
+            data.participants.forEach(participant => {
+                results[skillIndex].push({
+                    playerName: participant.username,
+                    xpGained: participant.xp_gained,
+                    teamName: participant.team_name
+                });
+            });
+
+        } catch (error) {
+            console.error(`Error fetching data for skill ${skill}:`, error);
+        }
+        await new Promise(resolve => setTimeout(resolve, 10000));
+    }
 
     await saveTempleData(compId, results);
+    
     isFetching = false;
-};
-
-const fetchSkillData = async (skill, results) => {
-    try {
-        console.log("Fetching data for " + skill);
-        const response = await axios.get(`https://templeosrs.com/api/competition_info.php?id=${compId}&skill=${skill}`);
-        const data = response.data.data;
-
-        if (!results[skill]) {
-            results[skill] = [];
-        }
-
-        data.participants.forEach(participant => {
-            results[skill].push({
-                playerName: participant.username,
-                xpGained: participant.xp_gained,
-                teamName: participant.team_name
-            });
-        });
-
-    } catch (error) {
-        console.error(`Error fetching data for skill ${skill}:`, error);
-    }
-    await new Promise(resolve => setTimeout(resolve, 10000));
-};
-
-const combineDKSResults = (results) => {
-    const combinedSkill = "Combined_DKS";
-    results[combinedSkill] = [];
-
-    for (const subSkill of combinedSkillsMap[combinedSkill]) {
-        if (results[subSkill]) {
-            results[subSkill].forEach(participant => {
-                const existingParticipant = results[combinedSkill].find(p => p.playerName === participant.playerName);
-                if (existingParticipant) {
-                    existingParticipant.xpGained += participant.xpGained;
-                } else {
-                    results[combinedSkill].push({ ...participant });
-                }
-            });
-        }
-    }
 };
 
 const getAndSortLatestResults = async () => {
@@ -184,6 +154,7 @@ app.get('/results/:skillName', async (req, res) => {
     }
 });
 
+
 app.get('/teamTotals', async (req, res) => {
     try {
         const data = await getCompetitionResults(compId);
@@ -197,10 +168,11 @@ app.get('/teamTotals', async (req, res) => {
     }
 });
 
-app.get('/fetchTempleData', async (req, res) => {
+app.get('/fetchTempleData', async (req,res) => {
     if (isFetching) {
         res.status(200).send("Fetch already running");
-    } else {
+    }
+    else {
         fetchAndProcessData();
         res.status(200).send("Fetch started");
     }
