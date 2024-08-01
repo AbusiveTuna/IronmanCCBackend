@@ -132,29 +132,32 @@ const fetchAndProcessData = async () => {
 };
 
 const combineDagannothCategories = (results) => {
-    const combinedDagannothResults = [];
-    const dagannothSkills = ['Dagannoth_Prime', 'Dagannoth_Rex', 'Dagannoth_Supreme'];
+    const dagannothSkills = ['Dagannoth_Rex', 'Dagannoth_Prime', 'Dagannoth_Supreme'];
+    const combinedDagannothResults = {};
 
+    // Collect all Dagannoth data into a single object with players as keys
     dagannothSkills.forEach(skill => {
         if (results[skill]) {
             results[skill].forEach(player => {
-                const existingPlayer = combinedDagannothResults.find(p => p.playerName === player.playerName);
-                if (existingPlayer) {
-                    existingPlayer.xpGained += player.xpGained;
-                } else {
-                    combinedDagannothResults.push({ ...player });
+                if (!combinedDagannothResults[player.playerName]) {
+                    combinedDagannothResults[player.playerName] = {
+                        playerName: player.playerName,
+                        xpGained: 0, // Initialize xpGained
+                        points: 0 // Initialize points, which will be recalculated
+                    };
                 }
+                combinedDagannothResults[player.playerName].xpGained += player.xpGained;
             });
-            delete results[skill]; // Remove individual Dagannoth results
+            delete results[skill]; // Remove the processed Dagannoth skill results
         }
     });
 
-    if (combinedDagannothResults.length > 0) {
-        results['Dagannoth'] = combinedDagannothResults;
-    }
+    // Convert the combined results object back to an array format
+    results['Dagannoth'] = Object.values(combinedDagannothResults);
 
     return results;
 };
+
 
 app.get('/results', async (req, res) => {
     try {
