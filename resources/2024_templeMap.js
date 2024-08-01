@@ -4,7 +4,7 @@
 */
 
 export const templeMap = [
-    // ["Attack", "Attack", 1, 1],
+    ["Attack", "Attack", 1, 1],
     // ["Defence", "Defence", 1, 2],
     // ["Strength", "Strength", 1, 3],
     // ["Hitpoints", "Hitpoints", 1, 4],
@@ -37,7 +37,7 @@ export const templeMap = [
     // ["Chaos_Fanatic", "Chaos Fanatic", 1, 42],
     // ["Commander_Zilyana", "Zily", 2, 43],
     // ["Corporeal_Beast", "Corp", 3, 44],
-    ["Crazy_Archaeologist", "Crazy Arch", 1, 45],
+    // ["Crazy_Archaeologist", "Crazy Arch", 1, 45],
     ["Dagannoth_Prime", "Prime", 1, 46],
     ["Dagannoth_Rex", "Rex", 1, 47],
     ["Dagannoth_Supreme", "Supreme", 1, 48],

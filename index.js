@@ -58,17 +58,21 @@ const getAndSortLatestResults = async () => {
 
     // Combining Dagannoth categories
     const dagannothIndices = ['46', '47', '48'];  // Assuming these are the skill indices for the Dagannoths
-    const combinedDagannoth = [];
+    const combinedDagannoth = {};
 
     // Collect data for all Dagannoth categories
     dagannothIndices.forEach(skillIndex => {
         if (latestResults[skillIndex]) {
             latestResults[skillIndex].forEach(player => {
-                const existingPlayer = combinedDagannoth.find(p => p.playerName === player.playerName);
-                if (existingPlayer) {
-                    existingPlayer.xpGained += player.xpGained;
+                const playerKey = player.playerName + "#" + player.teamName; // Unique key by player and team
+                if (combinedDagannoth[playerKey]) {
+                    combinedDagannoth[playerKey].xpGained += player.xpGained;
                 } else {
-                    combinedDagannoth.push({...player});
+                    combinedDagannoth[playerKey] = {
+                        playerName: player.playerName,
+                        teamName: player.teamName,
+                        xpGained: player.xpGained
+                    };
                 }
             });
             delete latestResults[skillIndex]; // Remove the individual Dagannoth category
@@ -76,14 +80,12 @@ const getAndSortLatestResults = async () => {
     });
 
     // Add combined Dagannoth category
-    if (combinedDagannoth.length > 0) {
-        latestResults['Dagannoth'] = combinedDagannoth;
-    }
+    latestResults['Dagannoth'] = Object.values(combinedDagannoth);
 
+    // Sorting and filtering
     for (const skillIndex in latestResults) {
         if (Array.isArray(latestResults[skillIndex])) {
             latestResults[skillIndex] = latestResults[skillIndex].filter(player => player.xpGained > 0);
-
             latestResults[skillIndex].sort((a, b) => b.xpGained - a.xpGained);
 
             let topPlayers = [];
@@ -100,6 +102,7 @@ const getAndSortLatestResults = async () => {
 
     return latestResults;
 };
+
 
 const assignPoints = (sortedResults) => {
     const points = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
