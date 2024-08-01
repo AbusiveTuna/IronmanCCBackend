@@ -6,7 +6,7 @@ import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResult
 
 const app = express();
 const port = process.env.PORT || 3000;
-const compId = 24737 //26996;
+const compId = 24834 //26996;
 
 let templeSkills = [];
 let isFetching = false;
@@ -57,35 +57,35 @@ const getAndSortLatestResults = async () => {
     const latestResults = await getLatestTempleData(compId);
 
     // Combining Dagannoth categories
-    const dagannothIndices = ['46', '47', '48'];  // Assuming these are the skill indices for the Dagannoths
+    const dagannothIndices = ['Dagannoth Rex', 'Dagannoth Prime', 'Dagannoth Supreme'];
     const combinedDagannoth = {};
 
     // Collect data for all Dagannoth categories
-    dagannothIndices.forEach(skillIndex => {
-        if (latestResults[skillIndex]) {
-            latestResults[skillIndex].forEach(player => {
-                const playerKey = player.playerName + "#" + player.teamName; // Unique key by player and team
+    dagannothIndices.forEach(skill => {
+        if (latestResults[skill]) {
+            latestResults[skill].forEach(player => {
+                const playerKey = player.playerName; // Combine based on playerName
                 if (combinedDagannoth[playerKey]) {
                     combinedDagannoth[playerKey].xpGained += player.xpGained;
                 } else {
                     combinedDagannoth[playerKey] = {
                         playerName: player.playerName,
-                        teamName: player.teamName,
                         xpGained: player.xpGained
                     };
                 }
             });
-            delete latestResults[skillIndex]; // Remove the individual Dagannoth category
+            delete latestResults[skill]; // Remove the individual Dagannoth category
         }
     });
 
     // Add combined Dagannoth category
     latestResults['Dagannoth'] = Object.values(combinedDagannoth);
 
-    // Sorting and filtering
+    // Sorting and filtering remaining categories
     for (const skillIndex in latestResults) {
         if (Array.isArray(latestResults[skillIndex])) {
             latestResults[skillIndex] = latestResults[skillIndex].filter(player => player.xpGained > 0);
+
             latestResults[skillIndex].sort((a, b) => b.xpGained - a.xpGained);
 
             let topPlayers = [];
@@ -102,6 +102,7 @@ const getAndSortLatestResults = async () => {
 
     return latestResults;
 };
+
 
 
 const assignPoints = (sortedResults) => {
