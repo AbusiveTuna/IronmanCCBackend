@@ -11,8 +11,18 @@ const compId = 26996;
 let templeSkills = [];
 let isFetching = false;
 
+// Define combined categories
+const combinedSkillsMap = {
+    "Combined_DKS": ["Dagannoth_Prime", "Dagannoth_Rex", "Dagannoth_Supreme"]
+};
+
 const getTempleSkills = () => {
     templeSkills = templeMap.map(row => row[row.length - 1]);
+
+    // Add combined categories to templeSkills
+    for (const combinedSkill in combinedSkillsMap) {
+        templeSkills.push(combinedSkill);
+    }
 };
 
 const fetchCompetitionInfo = async () => {
@@ -24,33 +34,44 @@ const fetchCompetitionInfo = async () => {
 
     let results = {};
     for (const skill of templeSkills) {
-        try {
-            console.log("Fetching data for " + skill);
-            const response = await axios.get(`https://templeosrs.com/api/competition_info.php?id=${compId}&skill=${skill}`);
-            const data = response.data.data;
-
-            const skillIndex = data.info.skill;
-            if (!results[skillIndex]) {
-                results[skillIndex] = [];
+        if (combinedSkillsMap[skill]) {
+            results[skill] = [];
+            for (const subSkill of combinedSkillsMap[skill]) {
+                await fetchSkillData(subSkill, results[skill]);
             }
-
-            data.participants.forEach(participant => {
-                results[skillIndex].push({
-                    playerName: participant.username,
-                    xpGained: participant.xp_gained,
-                    teamName: participant.team_name
-                });
-            });
-
-        } catch (error) {
-            console.error(`Error fetching data for skill ${skill}:`, error);
+        } else {
+            await fetchSkillData(skill, results[skill]);
         }
-        await new Promise(resolve => setTimeout(resolve, 10000));
     }
 
     await saveTempleData(compId, results);
     
     isFetching = false;
+};
+
+const fetchSkillData = async (skill, resultArray) => {
+    try {
+        console.log("Fetching data for " + skill);
+        const response = await axios.get(`https://templeosrs.com/api/competition_info.php?id=${compId}&skill=${skill}`);
+        const data = response.data.data;
+
+        const skillIndex = data.info.skill;
+        if (!resultArray[skillIndex]) {
+            resultArray[skillIndex] = [];
+        }
+
+        data.participants.forEach(participant => {
+            resultArray.push({
+                playerName: participant.username,
+                xpGained: participant.xp_gained,
+                teamName: participant.team_name
+            });
+        });
+
+    } catch (error) {
+        console.error(`Error fetching data for skill ${skill}:`, error);
+    }
+    await new Promise(resolve => setTimeout(resolve, 10000));
 };
 
 const getAndSortLatestResults = async () => {
@@ -154,7 +175,6 @@ app.get('/results/:skillName', async (req, res) => {
     }
 });
 
-
 app.get('/teamTotals', async (req, res) => {
     try {
         const data = await getCompetitionResults(compId);
@@ -168,11 +188,10 @@ app.get('/teamTotals', async (req, res) => {
     }
 });
 
-app.get('/fetchTempleData', async (req,res) => {
+app.get('/fetchTempleData', async (req, res) => {
     if (isFetching) {
         res.status(200).send("Fetch already running");
-    }
-    else {
+    } else {
         fetchAndProcessData();
         res.status(200).send("Fetch started");
     }
