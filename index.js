@@ -167,6 +167,21 @@ app.get('/results', async (req, res) => {
     }
 });
 
+
+
+app.get('/resultsTesting', async (req, res) => {
+    try {
+        const data = await getLatestTempleData(compId);
+        if (data) {
+            res.json(data);
+        } else {
+            res.status(404).send('Results not found');
+        }
+    } catch (error) {
+        res.status(500).send('Server error');
+    }
+});
+
 app.get('/results/:skillName', async (req, res) => {
     try {
         const data = await getCompetitionResults(compId);
