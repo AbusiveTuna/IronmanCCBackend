@@ -17,8 +17,6 @@ const updateGoogleSheet = async (latestResults, teamTotals) => {
         await doc.loadInfo();
         console.log("Success! Updating Team Totals");
         await updateTeamTotals(teamTotals);
-        // console.log("Success! Updating Skill Sheets");
-        // await updateSkillSheets(latestResults);
     } catch (error) {
         console.error('Failed to update Google Sheet:', error);
     }
@@ -44,31 +42,6 @@ const updateTeamTotals = async(teamTotals) => {
     });
 
     await sheet.addRow(pointsRow); 
-};
-
-const updateSkillSheets = async (latestResults) => {
-    for (const skill in latestResults) {
-        let sheet = doc.sheetsByTitle[skill];
-
-        if (!sheet) {
-            sheet = await doc.addSheet({ title: skill });
-            await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']);
-        } else {
-            await sheet.clear();
-            await sheet.setHeaderRow(['Player Name', 'Team Name', 'XP Gained', 'Points']); 
-        }
-
-        
-        const rows = latestResults[skill].map(player => ({
-            'Player Name': player.playerName,
-            'Team Name': player.teamName,
-            'XP Gained': player.xpGained,
-            'Points': player.points
-        }));
-
-        
-        await sheet.addRows(rows);
-    }
 };
 
 export { updateGoogleSheet };

@@ -6,7 +6,8 @@ import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResult
 
 const app = express();
 const port = process.env.PORT || 3000;
-const compId = 26996;
+// const compId = 26996;
+const compId = 24737;
 
 let templeSkills = [];
 let isFetching = false;
