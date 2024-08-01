@@ -11,6 +11,8 @@ const compId = 24737; //26996;
 let templeSkills = [];
 let isFetching = false;
 
+const dagannothIndices = [46, 47, 48]; // Skill indices for Dagannoth Prime, Rex, and Supreme
+
 const getTempleSkills = () => {
     templeSkills = templeMap.map(row => row[row.length - 1]);
 };
@@ -58,11 +60,10 @@ const fetchCompetitionInfo = async () => {
 const combineDagannothResults = (results) => {
     const combinedResults = {};
     const combinedSkill = "Combined_DKS";
-    const dagannothSkills = ["Dagannoth_Rex", "Dagannoth_Prime", "Dagannoth_Supreme"];
 
-    dagannothSkills.forEach(skill => {
-        if (results[skill]) {
-            results[skill].forEach(player => {
+    dagannothIndices.forEach(skillIndex => {
+        if (results[skillIndex]) {
+            results[skillIndex].forEach(player => {
                 if (!combinedResults[player.playerName]) {
                     combinedResults[player.playerName] = {
                         playerName: player.playerName,
@@ -78,8 +79,8 @@ const combineDagannothResults = (results) => {
     results[combinedSkill] = Object.values(combinedResults);
 
     // Remove original Dagannoth skills from results
-    dagannothSkills.forEach(skill => {
-        delete results[skill];
+    dagannothIndices.forEach(skillIndex => {
+        delete results[skillIndex];
     });
 
     return results;
