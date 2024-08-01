@@ -56,53 +56,44 @@ const fetchCompetitionInfo = async () => {
 const getAndSortLatestResults = async () => {
     const latestResults = await getLatestTempleData(compId);
 
-    // Combining Dagannoth categories
-    const dagannothIndices = ['Dagannoth Rex', 'Dagannoth Prime', 'Dagannoth Supreme'];
+    const dagannothCategories = ['Dagannoth Rex', 'Dagannoth Prime', 'Dagannoth Supreme'];
     const combinedDagannoth = {};
 
-    // Collect data for all Dagannoth categories
-    dagannothIndices.forEach(skill => {
-        if (latestResults[skill]) {
-            latestResults[skill].forEach(player => {
-                const playerKey = player.playerName; // Combine based on playerName
-                if (combinedDagannoth[playerKey]) {
-                    combinedDagannoth[playerKey].xpGained += player.xpGained;
+    dagannothCategories.forEach(category => {
+        if (latestResults[category]) {
+            latestResults[category].forEach(player => {
+                const key = `${player.playerName}-${player.teamName}`;
+                if (combinedDagannoth[key]) {
+                    combinedDagannoth[key].xpGained += player.xpGained;
                 } else {
-                    combinedDagannoth[playerKey] = {
-                        playerName: player.playerName,
-                        xpGained: player.xpGained
-                    };
+                    combinedDagannoth[key] = { ...player };
                 }
             });
-            delete latestResults[skill]; // Remove the individual Dagannoth category
+            delete latestResults[category];
         }
     });
 
-    // Add combined Dagannoth category
     latestResults['Dagannoth'] = Object.values(combinedDagannoth);
 
-    // Sorting and filtering remaining categories
-    for (const skillIndex in latestResults) {
-        if (Array.isArray(latestResults[skillIndex])) {
-            latestResults[skillIndex] = latestResults[skillIndex].filter(player => player.xpGained > 0);
-
-            latestResults[skillIndex].sort((a, b) => b.xpGained - a.xpGained);
+    for (const skill in latestResults) {
+        if (Array.isArray(latestResults[skill])) {
+            latestResults[skill] = latestResults[skill].filter(player => player.xpGained > 0);
+            latestResults[skill].sort((a, b) => b.xpGained - a.xpGained);
 
             let topPlayers = [];
-            for (let i = 0; i < latestResults[skillIndex].length; i++) {
-                if (i < 10 || (i >= 10 && latestResults[skillIndex][i].xpGained === latestResults[skillIndex][i - 1].xpGained)) {
-                    topPlayers.push(latestResults[skillIndex][i]);
+            for (let i = 0; i < latestResults[skill].length; i++) {
+                if (i < 10 || (i >= 10 && latestResults[skill][i].xpGained === latestResults[skill][i - 1].xpGained)) {
+                    topPlayers.push(latestResults[skill][i]);
                 } else {
                     break;
                 }
             }
-            latestResults[skillIndex] = topPlayers;
+            latestResults[skill] = topPlayers;
         }
     }
 
     return latestResults;
 };
-
 
 
 const assignPoints = (sortedResults) => {
@@ -158,21 +149,6 @@ const fetchAndProcessData = async () => {
 app.get('/results', async (req, res) => {
     try {
         const data = await getCompetitionResults(compId);
-        if (data) {
-            res.json(data);
-        } else {
-            res.status(404).send('Results not found');
-        }
-    } catch (error) {
-        res.status(500).send('Server error');
-    }
-});
-
-
-
-app.get('/resultsTesting', async (req, res) => {
-    try {
-        const data = await getLatestTempleData(compId);
         if (data) {
             res.json(data);
         } else {
