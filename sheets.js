@@ -35,7 +35,6 @@ const updateTeamTotals = async(teamTotals) => {
         await sheet.setHeaderRow(headers);
     }
 
-   
     const pointsRow = ['Total Points:']; 
     teamNames.forEach(teamName => {
         pointsRow.push(teamTotals[teamName]); 
@@ -43,5 +42,12 @@ const updateTeamTotals = async(teamTotals) => {
 
     await sheet.addRow(pointsRow); 
 };
+
+const grabSheetInfo = async() => {
+    let sheet = doc.sheetsByTitle["TunaTotal"];
+    if(sheet){
+        
+    }
+}
 
 export { updateGoogleSheet };
