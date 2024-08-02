@@ -7,7 +7,7 @@ import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResult
 
 const app = express();
 const port = process.env.PORT || 3000;
-const compId = 24834;//26996
+const compId = 26996;
 
 app.use(cors());
 
