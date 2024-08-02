@@ -1,12 +1,15 @@
 import express from 'express';
 import axios from 'axios';
+import cors from 'cors';
 import { templeMap } from './resources/2024_templeMap.js';
 import { updateGoogleSheet } from './sheets.js';
 import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults  } from './database.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
-const compId = 26996
+const compId = 24834;//26996
+
+app.use(cors());
 
 let templeSkills = [];
 let isFetching = false;
