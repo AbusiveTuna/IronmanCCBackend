@@ -53,18 +53,18 @@ const grabSheetInfo = async() => {
         const range = 'A1:D312';
         await sheet.loadCells(range);
 
-        const data = {
-            header: "",
-            players: []
-        };
+        const data = [];
+        
         headers.forEach((header, index) => {
-            const startRowIndex = parseInt(header.substring(1)) - 1;
-            const endRowIndex = index + 1 < headers.length ? parseInt(headers[index + 1].substring(1)) - 1 : 311;
+            const startRowIndex = parseInt(header.substring(1)) - 1; // Convert header row to index
+            const endRowIndex = index + 1 < headers.length ? parseInt(headers[index + 1].substring(1)) - 1 : 311; // End row index for this section
+            
+            const categoryData = {
+                header: sheet.getCell(startRowIndex, 0).value,
+                players: []
+            };
 
-            if (data.header === "") {
-                data.header = sheet.getCell(startRowIndex, 0).value;
-            }
-
+            // Collect player data between headers
             for (let rowIndex = startRowIndex + 1; rowIndex <= endRowIndex; rowIndex++) {
                 const value = sheet.getCell(rowIndex, 0).value;
                 const name = sheet.getCell(rowIndex, 1).value;
@@ -72,7 +72,7 @@ const grabSheetInfo = async() => {
                 const points = sheet.getCell(rowIndex, 3).value;
 
                 if (name && team && points) {
-                    data.players.push({
+                    categoryData.players.push({
                         value,
                         name,
                         team,
@@ -80,9 +80,10 @@ const grabSheetInfo = async() => {
                     });
                 }
             }
+
+            data.push(categoryData);
         });
-        console.log("returning data");
-        console.log(data);
+
         return data;
     }
 };

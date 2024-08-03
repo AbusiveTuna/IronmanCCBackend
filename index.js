@@ -205,9 +205,7 @@ app.get('/fetchSheetData', async (req,res) => {
     }
     else {
         const sheetInfo = await grabSheetInfo();
-        console.log("saving info!");
         await saveSheetData(compId, sheetInfo);
-        console.log("pulling from db!");
        const sheetData = await getSheetData(compId);
        if(sheetData) {
         res.json(sheetData);
