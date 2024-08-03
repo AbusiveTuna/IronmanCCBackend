@@ -54,7 +54,7 @@ const grabSheetInfo = async() => {
         await sheet.loadCells(range);
 
         const data = [];
-        
+
         headers.forEach((header, index) => {
             const startRowIndex = parseInt(header.substring(1)) - 1; // Convert header row to index
             const endRowIndex = index + 1 < headers.length ? parseInt(headers[index + 1].substring(1)) - 1 : 311; // End row index for this section

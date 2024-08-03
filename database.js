@@ -46,7 +46,7 @@ const saveSheetData = async (competitionId, data) => {
              VALUES ($1, $2)
              ON CONFLICT (competition_id)
              DO UPDATE SET data = EXCLUDED.data`,
-            [competitionId, data]
+            [competitionId, JSON.stringify(data)]
         );
     } finally {
         client.release();
