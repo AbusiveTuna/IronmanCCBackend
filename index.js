@@ -207,7 +207,7 @@ app.get('/fetchSheetData', async (req,res) => {
         res.status(200).send("Fetch already running");
     }
     else {
-       const sheetData = getSheetData();
+       const sheetData = getSheetData(compId);
        if(sheetData) {
         res.json(sheetData);
        }
