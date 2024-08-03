@@ -3,6 +3,8 @@ import { JWT } from 'google-auth-library';
 
 const creds = JSON.parse(Buffer.from(process.env.GOOGLE_CREDS, 'base64').toString());
 
+const headers = ['A1', 'A4', 'A7', 'A10', 'A13', 'A16', 'A19', 'A22', 'A25', 'A28', 'A31', 'A34', 'A37', 'A40', 'A43', 'A46', 'A49', 'A60', 'A71', 'A82', 'A93', 'A104', 'A115', 'A126', 'A137', 'A148', 'A159', 'A170', 'A181', 'A192', 'A203', 'A214', 'A225', 'A236', 'A247', 'A258', 'A269', 'A280', 'A291', 'A302'];
+
 const serviceAccountAuth = new JWT({
     email: creds.client_email,
     key: creds.private_key,
@@ -44,10 +46,42 @@ const updateTeamTotals = async(teamTotals) => {
 };
 
 const grabSheetInfo = async() => {
-    let sheet = doc.sheetsByTitle["TunaTotal"];
+    console.log("Attempting to grab google sheets info");
+    await doc.loadInfo();
+    let sheet = doc.sheetsByTitle["Overall View"];
     if(sheet){
-        
-    }
-}
+        const range = 'A1:D312';
+        await sheet.loadCells(range);
 
-export { updateGoogleSheet };
+        const data = {
+            header: "Category",
+            players: []
+        };
+
+        headers.forEach((header, index) => {
+            const startRowIndex = parseInt(header.substring(1));
+            const endRowIndex = index + 1 < headers.length ? parseInt(headers[index + 1].substring(1)) - 1 : 312;
+            
+            for (let rowIndex = startRowIndex; rowIndex <= endRowIndex; rowIndex++) {
+                const value = sheet.getCell(rowIndex - 1, 0).value;
+                const name = sheet.getCell(rowIndex - 1, 1).value;
+                const team = sheet.getCell(rowIndex - 1, 2).value;
+                const points = sheet.getCell(rowIndex - 1, 3).value;
+
+                if (name && team && points) {
+                    data.players.push({
+                        value,
+                        name,
+                        team,
+                        points
+                    });
+                }
+            }
+        });
+
+        return data;
+    }
+};
+
+
+export { updateGoogleSheet, grabSheetInfo };

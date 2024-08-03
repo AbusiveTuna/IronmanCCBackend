@@ -25,6 +25,42 @@ const createTable = async () => {
                 team_totals JSONB NOT NULL
             )
         `);
+
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS sheet_data (
+                competition_id INTEGER PRIMARY KEY,
+                data JSONB NOT NULL
+            )
+        `);
+
+    } finally {
+        client.release();
+    }
+};
+
+const saveSheetData = async (competitionId, data) => {
+    const client = await pool.connect();
+    try {
+        await client.query(
+            `INSERT INTO sheet_data (competition_id, data)
+             VALUES ($1, $2)
+             ON CONFLICT (competition_id)
+             DO UPDATE SET data = EXCLUDED.data`,
+            [competitionId, data]
+        );
+    } finally {
+        client.release();
+    }
+};
+
+const getSheetData = async (competitionId) => {
+    const client = await pool.connect();
+    try {
+        const res = await client.query(
+            `SELECT data FROM sheet_data WHERE competition_id = $1`,
+            [competitionId]
+        );
+        return res.rows.length > 0 ? res.rows[0].data : null;
     } finally {
         client.release();
     }
@@ -86,4 +122,4 @@ const getCompetitionResults = async (competitionId) => {
     }
 };
 
-export { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults };
+export { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, saveSheetData, getSheetData };

@@ -2,8 +2,8 @@ import express from 'express';
 import axios from 'axios';
 import cors from 'cors';
 import { templeMap } from './resources/2024_templeMap.js';
-import { updateGoogleSheet } from './sheets.js';
-import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults  } from './database.js';
+import { updateGoogleSheet, grabSheetInfo } from './sheets.js';
+import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, getSheetData, saveSheetData  } from './database.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -53,6 +53,9 @@ const fetchCompetitionInfo = async () => {
 
     await saveTempleData(compId, results);
     
+    const sheetInfo = await grabSheetInfo();
+    await saveSheetData(compId, sheetInfo);
+
     isFetching = false;
 };
 
@@ -176,7 +179,6 @@ app.get('/results/:skillName', async (req, res) => {
     }
 });
 
-
 app.get('/teamTotals', async (req, res) => {
     try {
         const data = await getCompetitionResults(compId);
@@ -198,6 +200,22 @@ app.get('/fetchTempleData', async (req,res) => {
         fetchAndProcessData();
         res.status(200).send("Fetch started");
     }
+});
+
+app.get('/fetchSheetData', async (req,res) => {
+    if (isFetching) {
+        res.status(200).send("Fetch already running");
+    }
+    else {
+       const sheetData = getSheetData();
+       if(sheetData) {
+        res.json(sheetData);
+       }
+       else{
+        res.status(404).send('No Sheet Data Found');
+       }
+    }
+    
 });
 
 app.listen(port, async () => {
