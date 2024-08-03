@@ -52,6 +52,8 @@ const fetchCompetitionInfo = async () => {
     }
 
     await saveTempleData(compId, results);
+    const sheetInfo = await grabSheetInfo();
+    await saveSheetData(compId, sheetInfo);
 
     isFetching = false;
 };
@@ -204,8 +206,6 @@ app.get('/fetchSheetData', async (req,res) => {
         res.status(200).send("Fetch already running");
     }
     else {
-        const sheetInfo = await grabSheetInfo();
-        await saveSheetData(compId, sheetInfo);
        const sheetData = await getSheetData(compId);
        if(sheetData) {
         res.json(sheetData);
