@@ -202,10 +202,6 @@ app.get('/fetchTempleData', async (req,res) => {
 });
 
 app.get('/fetchSheetData', async (req,res) => {
-    if (isFetching) {
-        res.status(200).send("Fetch already running");
-    }
-    else {
        const sheetData = await getSheetData(compId);
        if(sheetData) {
         res.json(sheetData);
@@ -213,8 +209,6 @@ app.get('/fetchSheetData', async (req,res) => {
        else{
         res.status(404).send('No Sheet Data Found');
        }
-    }
-    
 });
 
 app.listen(port, async () => {
