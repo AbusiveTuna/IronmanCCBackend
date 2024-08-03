@@ -54,19 +54,22 @@ const grabSheetInfo = async() => {
         await sheet.loadCells(range);
 
         const data = {
-            header: "Category",
+            header: "",
             players: []
         };
-        console.log("Entering Headers");
         headers.forEach((header, index) => {
-            const startRowIndex = parseInt(header.substring(1));
-            const endRowIndex = index + 1 < headers.length ? parseInt(headers[index + 1].substring(1)) - 1 : 312;
-            
-            for (let rowIndex = startRowIndex; rowIndex <= endRowIndex; rowIndex++) {
-                const value = sheet.getCell(rowIndex - 1, 0).value;
-                const name = sheet.getCell(rowIndex - 1, 1).value;
-                const team = sheet.getCell(rowIndex - 1, 2).value;
-                const points = sheet.getCell(rowIndex - 1, 3).value;
+            const startRowIndex = parseInt(header.substring(1)) - 1;
+            const endRowIndex = index + 1 < headers.length ? parseInt(headers[index + 1].substring(1)) - 1 : 311;
+
+            if (data.header === "") {
+                data.header = sheet.getCell(startRowIndex, 0).value;
+            }
+
+            for (let rowIndex = startRowIndex + 1; rowIndex <= endRowIndex; rowIndex++) {
+                const value = sheet.getCell(rowIndex, 0).value;
+                const name = sheet.getCell(rowIndex, 1).value;
+                const team = sheet.getCell(rowIndex, 2).value;
+                const points = sheet.getCell(rowIndex, 3).value;
 
                 if (name && team && points) {
                     data.players.push({
