@@ -52,9 +52,6 @@ const fetchCompetitionInfo = async () => {
     }
 
     await saveTempleData(compId, results);
-    
-    const sheetInfo = await grabSheetInfo();
-    await saveSheetData(compId, sheetInfo);
 
     isFetching = false;
 };
@@ -207,6 +204,10 @@ app.get('/fetchSheetData', async (req,res) => {
         res.status(200).send("Fetch already running");
     }
     else {
+        const sheetInfo = await grabSheetInfo();
+        console.log("saving info!");
+        await saveSheetData(compId, sheetInfo);
+        console.log("pulling from db!");
        const sheetData = getSheetData(compId);
        if(sheetData) {
         res.json(sheetData);
@@ -223,7 +224,7 @@ app.listen(port, async () => {
     await createTable();
     getTempleSkills();
 
-    await fetchAndProcessData();
+    //await fetchAndProcessData();
 
     setInterval(() => {
         fetchAndProcessData();

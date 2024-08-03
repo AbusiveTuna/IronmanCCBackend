@@ -57,7 +57,7 @@ const grabSheetInfo = async() => {
             header: "Category",
             players: []
         };
-
+        console.log("Entering Headers");
         headers.forEach((header, index) => {
             const startRowIndex = parseInt(header.substring(1));
             const endRowIndex = index + 1 < headers.length ? parseInt(headers[index + 1].substring(1)) - 1 : 312;
@@ -78,7 +78,8 @@ const grabSheetInfo = async() => {
                 }
             }
         });
-
+        console.log("returning data");
+        console.log(data);
         return data;
     }
 };
