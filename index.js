@@ -100,27 +100,47 @@ const getAndSortLatestResults = async () => {
     return latestResults;
 };
 
-
+//hard cut off at 10, doesnt handle ties. 
 const assignPoints = (sortedResults) => {
     const points = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
 
     for (const skill in sortedResults) {
         if (Array.isArray(sortedResults[skill])) {
-            let currentPointsIndex = 0;
-
             for (let i = 0; i < sortedResults[skill].length; i++) {
-                if (i > 0 && sortedResults[skill][i].xpGained === sortedResults[skill][i - 1].xpGained) {
-                    sortedResults[skill][i].points = sortedResults[skill][i - 1].points;
+                if (i < 10) {
+                    sortedResults[skill][i].points = points[i];
                 } else {
-                    sortedResults[skill][i].points = points[currentPointsIndex] || 0;
+                    sortedResults[skill][i].points = 0;
                 }
-                currentPointsIndex++;
             }
         }
     }
 
     return sortedResults;
 };
+
+
+//handles ties fairly giving points for everyone.
+// const assignPoints = (sortedResults) => {
+//     const points = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
+
+//     for (const skill in sortedResults) {
+//         if (Array.isArray(sortedResults[skill])) {
+//             let currentPointsIndex = 0;
+
+//             for (let i = 0; i < sortedResults[skill].length; i++) {
+//                 if (i > 0 && sortedResults[skill][i].xpGained === sortedResults[skill][i - 1].xpGained) {
+//                     sortedResults[skill][i].points = sortedResults[skill][i - 1].points;
+//                 } else {
+//                     sortedResults[skill][i].points = points[currentPointsIndex] || 0;
+//                 }
+//                 currentPointsIndex++;
+//             }
+//         }
+//     }
+
+//     return sortedResults;
+// };
 
 const getTeamTotals = (results) => {
     const teamTotals = {};
