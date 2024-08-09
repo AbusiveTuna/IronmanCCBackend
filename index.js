@@ -241,8 +241,7 @@ const fetchJustenData = async () => {
     try {
         console.log("Grabbing justens page");
         const justenResponse = await axios.get(justenLookup);
-        console.log(justenResponse.data);
-        console.log(justenResponse.data.data);
+        console.log(justenResponse.data.data['Chambers of Xeric']);
 
     } catch (error) {
         console.error(`Error fetching data for justen:`, error);
@@ -251,7 +250,16 @@ const fetchJustenData = async () => {
     try {
         console.log("Grabbing cox page");
         const coxResponse = await axios.get(coxLookup);
-        console.log(coxResponse.data);
+        console.log(coxResponse.data.data);
+        const players = coxResponse.data.data.players;
+        console.log(players);
+        for (const username in players) {
+            if (username == "Justen") {
+                const player = players[username];
+                console.log(`Player ID: `, player);
+                console.log(player.rank);
+            }
+        }
 
     } catch (error) {
         console.error(`Error fetching data for cox:`, error);
