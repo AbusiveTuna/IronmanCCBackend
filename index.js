@@ -279,7 +279,7 @@ app.listen(port, async () => {
     await createTable();
     getTempleSkills();
 
-    //await fetchAndProcessData();
+    await fetchAndProcessData();
     await fetchJustenData();
 
     setInterval(() => {
