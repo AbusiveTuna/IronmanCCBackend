@@ -3,7 +3,7 @@ import axios from 'axios';
 import cors from 'cors';
 import { templeMap } from './resources/2024_templeMap.js';
 import { updateGoogleSheet, grabSheetInfo } from './sheets.js';
-import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, getSheetData, saveSheetData  } from './database.js';
+import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, getSheetData, saveSheetData, saveJustenTbow, getJustenTbow  } from './database.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -232,7 +232,12 @@ app.get('/fetchSheetData', async (req,res) => {
 });
 
 app.get('/justenTbow', async (req,res) => {
-
+    const justenData = await getJustenTbow();
+    if(justenData){
+        res.json(justenData);
+    } else {
+        res.status(404).send('No Justen Data Found');
+    }
 });
 
 const fetchJustenData = async () => {
@@ -249,7 +254,6 @@ const fetchJustenData = async () => {
     }
     await new Promise(resolve => setTimeout(resolve, 10000));
     try {
-        console.log("Grabbing cox page");
         const coxResponse = await axios.get(coxLookup);
         const players = coxResponse.data.data.players;
         for (const playerId in players) {
@@ -258,10 +262,7 @@ const fetchJustenData = async () => {
                 if(player.username == "Justen"){
                     console.log(player.rank);
                     rank = player.rank
-                } else {
-                    console.log(player.username);
                 }
-
             }
         }
 
@@ -269,8 +270,7 @@ const fetchJustenData = async () => {
         console.error(`Error fetching data for cox:`, error);
     }
 
-    //save to db
-
+    await saveJustenTbow(coxKc, rank);
     return;
 };
 
@@ -284,5 +284,6 @@ app.listen(port, async () => {
 
     setInterval(() => {
         fetchAndProcessData();
+        fetchJustenData();
     }, 3600000);
 });

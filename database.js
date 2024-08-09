@@ -33,6 +33,41 @@ const createTable = async () => {
             )
         `);
 
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS justen_tbow (
+                id SERIAL PRIMARY KEY,
+                kc INTEGER NOT NULL,
+                rank INTEGER NOT NULL
+            )
+        `);
+
+    } finally {
+        client.release();
+    }
+};
+
+const saveJustenTbow = async (kc, rank) => {
+    const client = await pool.connect();
+    try {
+        await client.query(
+            `INSERT INTO justen_tbow (id, kc, rank)
+             VALUES (1, $1, $2)
+             ON CONFLICT (id)
+             DO UPDATE SET kc = EXCLUDED.kc, rank = EXCLUDED.rank`,
+            [kc, rank]
+        );
+    } finally {
+        client.release();
+    }
+};
+
+const getJustenTbow = async () => {
+    const client = await pool.connect();
+    try {
+        const res = await client.query(
+            `SELECT kc, rank FROM justen_tbow WHERE id = 1`
+        );
+        return res.rows[0] ? { kc: res.rows[0].kc, rank: res.rows[0].rank } : null;
     } finally {
         client.release();
     }
@@ -122,4 +157,4 @@ const getCompetitionResults = async (competitionId) => {
     }
 };
 
-export { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, saveSheetData, getSheetData };
+export { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, saveSheetData, getSheetData, saveJustenTbow, getJustenTbow };
