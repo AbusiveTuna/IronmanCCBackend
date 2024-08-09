@@ -231,12 +231,28 @@ app.get('/fetchSheetData', async (req,res) => {
        }
 });
 
+app.get('/justenTbow', async (req,res) => {
+
+});
+
+const fetchJustenData = async () => {
+    const justenLookup = 'https://templeosrs.com/api/player_stats.php?player=Justen&bosses=39';
+    const coxLookup = 'https://templeosrs.com/api/skill_hiscores.php?skill=39&gamemode=1';
+
+    const justenResponse = await axios.get(justenLookup);
+    const coxResponse = await axios.get(coxLookup);
+
+    console.log(justenResponse.data);
+    console.log(coxResponse.data);
+};
+
 app.listen(port, async () => {
     console.log("Running on port: " + port);
     await createTable();
     getTempleSkills();
 
-    await fetchAndProcessData();
+    //await fetchAndProcessData();
+    await fetchJustenData();
 
     setInterval(() => {
         fetchAndProcessData();
