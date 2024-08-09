@@ -238,10 +238,11 @@ app.get('/justenTbow', async (req,res) => {
 const fetchJustenData = async () => {
     const justenLookup = 'https://templeosrs.com/api/player_stats.php?player=Justen&bosses=39';
     const coxLookup = 'https://templeosrs.com/api/skill_hiscores.php?skill=39&gamemode=1';
+    let coxKc = 0;
+    let rank = 0;
     try {
-        console.log("Grabbing justens page");
         const justenResponse = await axios.get(justenLookup);
-        console.log(justenResponse.data.data['Chambers of Xeric']);
+        coxKc = justenResponse.data.data['Chambers of Xeric'];
 
     } catch (error) {
         console.error(`Error fetching data for justen:`, error);
@@ -250,20 +251,25 @@ const fetchJustenData = async () => {
     try {
         console.log("Grabbing cox page");
         const coxResponse = await axios.get(coxLookup);
-        console.log(coxResponse.data.data);
         const players = coxResponse.data.data.players;
-        console.log(players);
-        for (const username in players) {
-            if (username == "Justen") {
-                const player = players[username];
-                console.log(`Player ID: `, player);
-                console.log(player.rank);
+        for (const playerId in players) {
+            if (players.hasOwnProperty(playerId)) {
+                const player = players[playerId];
+                if(player.username == "Justen"){
+                    console.log(player.rank);
+                    rank = player.rank
+                } else {
+                    console.log(player.username);
+                }
+
             }
         }
 
     } catch (error) {
         console.error(`Error fetching data for cox:`, error);
     }
+
+    //save to db
 
     return;
 };
