@@ -238,12 +238,26 @@ app.get('/justenTbow', async (req,res) => {
 const fetchJustenData = async () => {
     const justenLookup = 'https://templeosrs.com/api/player_stats.php?player=Justen&bosses=39';
     const coxLookup = 'https://templeosrs.com/api/skill_hiscores.php?skill=39&gamemode=1';
+    try {
+        console.log("Grabbing justens page");
+        const justenResponse = await axios.get(justenLookup);
+        console.log(justenResponse.data);
+        console.log(justenResponse.data.data);
 
-    const justenResponse = await axios.get(justenLookup);
-    const coxResponse = await axios.get(coxLookup);
+    } catch (error) {
+        console.error(`Error fetching data for justen:`, error);
+    }
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    try {
+        console.log("Grabbing cox page");
+        const coxResponse = await axios.get(coxLookup);
+        console.log(coxResponse.data);
 
-    console.log(justenResponse.data);
-    console.log(coxResponse.data);
+    } catch (error) {
+        console.error(`Error fetching data for cox:`, error);
+    }
+
+    return;
 };
 
 app.listen(port, async () => {
