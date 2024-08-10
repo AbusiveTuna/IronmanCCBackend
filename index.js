@@ -291,10 +291,8 @@ app.listen(port, async () => {
     await createTable();
     getTempleSkills();
 
-    const purpleInfo = await grabPurpleInfo();
-    await savePurpleData(compId,purpleInfo);
-    // await fetchAndProcessData();
-    // await fetchJustenData();
+    await fetchAndProcessData();
+    await fetchJustenData();
 
     setInterval(() => {
         fetchAndProcessData();
