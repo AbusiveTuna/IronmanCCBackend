@@ -3,7 +3,7 @@ import axios from 'axios';
 import cors from 'cors';
 import { templeMap } from './resources/2024_templeMap.js';
 import { updateGoogleSheet, grabSheetInfo, grabPurpleInfo } from './sheets.js';
-import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, getSheetData, saveSheetData, saveJustenTbow, getJustenTbow  } from './database.js';
+import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, getSheetData, saveSheetData, saveJustenTbow, getJustenTbow,getPurpleData,savePurpleData  } from './database.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -54,6 +54,8 @@ const fetchCompetitionInfo = async () => {
     await saveTempleData(compId, results);
     const sheetInfo = await grabSheetInfo();
     await saveSheetData(compId, sheetInfo);
+    const purpleInfo = await grabPurpleInfo();
+    await savePurpleData(compId,purpleInfo);
 
     isFetching = false;
 };
@@ -231,6 +233,16 @@ app.get('/fetchSheetData', async (req,res) => {
        }
 });
 
+app.get('/fetchPurpleData', async (req,res) => {
+    const purpleData = await grabPurpleInfo(compId);
+    if(purpleData) {
+     res.json(purpleData);
+    }
+    else{
+     res.status(404).send('No Purple Data Found');
+    }
+});
+
 app.get('/justenTbow', async (req,res) => {
     const justenData = await getJustenTbow();
     if(justenData){
@@ -279,7 +291,8 @@ app.listen(port, async () => {
     await createTable();
     getTempleSkills();
 
-    grabPurpleInfo();
+    const purpleInfo = await grabPurpleInfo();
+    await savePurpleData(compId,purpleInfo);
     // await fetchAndProcessData();
     // await fetchJustenData();
 

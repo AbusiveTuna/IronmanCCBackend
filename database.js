@@ -34,6 +34,13 @@ const createTable = async () => {
         `);
 
         await client.query(`
+            CREATE TABLE IF NOT EXISTS purple_data (
+                competition_id INTEGER PRIMARY KEY,
+                data JSONB NOT NULL
+            )
+        `);
+
+        await client.query(`
             CREATE TABLE IF NOT EXISTS justen_tbow (
                 id SERIAL PRIMARY KEY,
                 kc INTEGER NOT NULL,
@@ -101,6 +108,34 @@ const getSheetData = async (competitionId) => {
     }
 };
 
+const savePurpleData = async (competitionId, data) => {
+    const client = await pool.connect();
+    try {
+        await client.query(
+            `INSERT INTO purple_data (competition_id, data)
+             VALUES ($1, $2)
+             ON CONFLICT (competition_id)
+             DO UPDATE SET data = EXCLUDED.data`,
+            [competitionId, JSON.stringify(data)]
+        );
+    } finally {
+        client.release();
+    }
+};
+
+const getPurpleData = async (competitionId) => {
+    const client = await pool.connect();
+    try {
+        const res = await client.query(
+            `SELECT data FROM purple_data WHERE competition_id = $1`,
+            [competitionId]
+        );
+        return res.rows.length > 0 ? res.rows[0].data : null;
+    } finally {
+        client.release();
+    }
+};
+
 const saveTempleData = async (competitionId, results) => {
     const client = await pool.connect();
     try {
@@ -157,4 +192,4 @@ const getCompetitionResults = async (competitionId) => {
     }
 };
 
-export { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, saveSheetData, getSheetData, saveJustenTbow, getJustenTbow };
+export { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, saveSheetData, getSheetData, saveJustenTbow, getJustenTbow,savePurpleData,getPurpleData };

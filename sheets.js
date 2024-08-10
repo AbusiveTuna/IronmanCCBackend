@@ -154,7 +154,7 @@ const grabPurpleInfo = async() => {
             });
         }
 
-        console.log(data);
+        return data;
     }
 };
 
