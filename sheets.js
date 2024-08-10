@@ -88,5 +88,76 @@ const grabSheetInfo = async() => {
     }
 };
 
+const grabPurpleInfo = async() => {
+    console.log("Grabbing purple info");
+    await doc.loadInfo();
+    let sheet = doc.sheetsByTitle["Overall View"];
+    if(sheet){
+        const range = 'E2:H9';
+        await sheet.loadCells(range);
 
-export { updateGoogleSheet, grabSheetInfo };
+        const data = [];
+
+        // Grab Raid names from cells E2, E5, and E8
+        const raidNames = [
+            sheet.getCell(1, 4).value, // E2
+            sheet.getCell(4, 4).value, // E5
+            sheet.getCell(7, 4).value  // E8
+        ];
+
+        // Grab team names from cells F2, F3, F5, F6, F8, F9
+        const teamNames = [
+            sheet.getCell(1, 5).value, // F2
+            sheet.getCell(2, 5).value, // F3
+            sheet.getCell(4, 5).value, // F5
+            sheet.getCell(5, 5).value, // F6
+            sheet.getCell(7, 5).value, // F8
+            sheet.getCell(8, 5).value  // F9
+        ];
+
+        // Grab purple counts from cells G2, G3, G5, G6, G8, G9
+        const purpleCounts = [
+            sheet.getCell(1, 6).value, // G2
+            sheet.getCell(2, 6).value, // G3
+            sheet.getCell(4, 6).value, // G5
+            sheet.getCell(5, 6).value, // G6
+            sheet.getCell(7, 6).value, // G8
+            sheet.getCell(8, 6).value  // G9
+        ];
+
+        // Grab points from cells H2, H3, H5, H6, H8, H9
+        const points = [
+            sheet.getCell(1, 7).value || 0, // H2
+            sheet.getCell(2, 7).value || 0, // H3
+            sheet.getCell(4, 7).value || 0, // H5
+            sheet.getCell(5, 7).value || 0, // H6
+            sheet.getCell(7, 7).value || 0, // H8
+            sheet.getCell(8, 7).value || 0  // H9
+        ];
+
+        // Structure the data into 3 objects for each Raid
+        for (let i = 0; i < raidNames.length; i++) {
+            data.push({
+                raidName: raidNames[i],
+                teams: [
+                    {
+                        teamName: teamNames[i * 2],
+                        purpleCount: purpleCounts[i * 2],
+                        points: points[i * 2]
+                    },
+                    {
+                        teamName: teamNames[i * 2 + 1],
+                        purpleCount: purpleCounts[i * 2 + 1],
+                        points: points[i * 2 + 1]
+                    }
+                ]
+            });
+        }
+
+        console.log(data);
+    }
+};
+
+
+
+export { updateGoogleSheet, grabSheetInfo, grabPurpleInfo };

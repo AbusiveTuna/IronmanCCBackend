@@ -2,7 +2,7 @@ import express from 'express';
 import axios from 'axios';
 import cors from 'cors';
 import { templeMap } from './resources/2024_templeMap.js';
-import { updateGoogleSheet, grabSheetInfo } from './sheets.js';
+import { updateGoogleSheet, grabSheetInfo, grabPurpleInfo } from './sheets.js';
 import { createTable, saveTempleData, getLatestTempleData, saveCompetitionResults, getCompetitionResults, getSheetData, saveSheetData, saveJustenTbow, getJustenTbow  } from './database.js';
 
 const app = express();
@@ -279,8 +279,9 @@ app.listen(port, async () => {
     await createTable();
     getTempleSkills();
 
-    await fetchAndProcessData();
-    await fetchJustenData();
+    grabPurpleInfo();
+    // await fetchAndProcessData();
+    // await fetchJustenData();
 
     setInterval(() => {
         fetchAndProcessData();
