@@ -19,39 +19,39 @@ const getTempleSkills = () => {
 };
 
 const fetchCompetitionInfo = async () => {
-    if (isFetching) {
-        console.log("Fetch operation already in progress...");
-        return;
-    }
-    isFetching = true; 
+    // if (isFetching) {
+    //     console.log("Fetch operation already in progress...");
+    //     return;
+    // }
+    // isFetching = true; 
 
-    let results = {};
-    for (const skill of templeSkills) {
-        try {
-            console.log("Fetching data for " + skill);
-            const response = await axios.get(`https://templeosrs.com/api/competition_info.php?id=${compId}&skill=${skill}`);
-            const data = response.data.data;
+    // let results = {};
+    // for (const skill of templeSkills) {
+    //     try {
+    //         console.log("Fetching data for " + skill);
+    //         const response = await axios.get(`https://templeosrs.com/api/competition_info.php?id=${compId}&skill=${skill}`);
+    //         const data = response.data.data;
 
-            const skillIndex = data.info.skill;
-            if (!results[skillIndex]) {
-                results[skillIndex] = [];
-            }
+    //         const skillIndex = data.info.skill;
+    //         if (!results[skillIndex]) {
+    //             results[skillIndex] = [];
+    //         }
 
-            data.participants.forEach(participant => {
-                results[skillIndex].push({
-                    playerName: participant.username,
-                    xpGained: participant.xp_gained,
-                    teamName: participant.team_name
-                });
-            });
+    //         data.participants.forEach(participant => {
+    //             results[skillIndex].push({
+    //                 playerName: participant.username,
+    //                 xpGained: participant.xp_gained,
+    //                 teamName: participant.team_name
+    //             });
+    //         });
 
-        } catch (error) {
-            console.error(`Error fetching data for skill ${skill}:`, error);
-        }
-        await new Promise(resolve => setTimeout(resolve, 10000));
-    }
+    //     } catch (error) {
+    //         console.error(`Error fetching data for skill ${skill}:`, error);
+    //     }
+    //     await new Promise(resolve => setTimeout(resolve, 10000));
+    // }
 
-    await saveTempleData(compId, results);
+    // await saveTempleData(compId, results);
     const sheetInfo = await grabSheetInfo();
     await saveSheetData(compId, sheetInfo);
     const purpleInfo = await grabPurpleInfo();
@@ -120,29 +120,6 @@ const assignPoints = (sortedResults) => {
 
     return sortedResults;
 };
-
-
-//handles ties fairly giving points for everyone.
-// const assignPoints = (sortedResults) => {
-//     const points = [25, 18, 15, 12, 10, 8, 6, 4, 2, 1];
-
-//     for (const skill in sortedResults) {
-//         if (Array.isArray(sortedResults[skill])) {
-//             let currentPointsIndex = 0;
-
-//             for (let i = 0; i < sortedResults[skill].length; i++) {
-//                 if (i > 0 && sortedResults[skill][i].xpGained === sortedResults[skill][i - 1].xpGained) {
-//                     sortedResults[skill][i].points = sortedResults[skill][i - 1].points;
-//                 } else {
-//                     sortedResults[skill][i].points = points[currentPointsIndex] || 0;
-//                 }
-//                 currentPointsIndex++;
-//             }
-//         }
-//     }
-
-//     return sortedResults;
-// };
 
 const getTeamTotals = (results) => {
     const teamTotals = {};
