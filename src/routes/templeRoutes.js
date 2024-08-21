@@ -4,8 +4,13 @@ const router = Router();
 import {  getCompetitionResults, getJustenTbow } from '../models/templeModels.js';
 import { getSheetData } from '../models/sheetModels.js';
 import { fetchAndProcessData } from '../controllers/controller.js'
+import { grabPurpleInfo } from '../controllers/sheets.js';
 
 const compId = 26996;
+
+/*
+ * Returns: 
+*/
 
 router.get('/results', async (req, res) => {
     try {
@@ -19,6 +24,10 @@ router.get('/results', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+/*
+ * Returns: 
+*/
 
 router.get('/results/:skillName', async (req, res) => {
     try {
@@ -34,6 +43,10 @@ router.get('/results/:skillName', async (req, res) => {
     }
 });
 
+/*
+ * Returns: 
+*/
+
 router.get('/teamTotals', async (req, res) => {
     try {
         const data = await getCompetitionResults(compId);
@@ -47,10 +60,19 @@ router.get('/teamTotals', async (req, res) => {
     }
 });
 
+/*
+ * Returns: A confirmation that the fetch has started to run
+*/
+
 router.get('/fetchTempleData', async (req,res) => {
         res.status(200).send("Fetch started");
         fetchAndProcessData();
 });
+
+/*
+ * Route: Used for grabbing sheet data for competitions
+ * Returns: google sheet data 
+*/
 
 router.get('/fetchSheetData', async (req,res) => {
        const sheetData = await getSheetData(compId);
@@ -62,6 +84,10 @@ router.get('/fetchSheetData', async (req,res) => {
        }
 });
 
+/*
+ * Route: Used for grabbing the purples information from sheets
+ * Returns: purple data
+*/
 router.get('/fetchPurpleData', async (req,res) => {
     const purpleData = await grabPurpleInfo(compId);
     if(purpleData) {
@@ -72,6 +98,10 @@ router.get('/fetchPurpleData', async (req,res) => {
     }
 });
 
+/*
+ * Route: Used for updating didJustenGetTbowYet 
+ * Returns: KC and Current Rank for CoX
+*/
 router.get('/justenTbow', async (req,res) => {
     const justenData = await getJustenTbow();
     if(justenData){
