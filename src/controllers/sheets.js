@@ -1,3 +1,6 @@
+//Most of this is insanely hard coded, but i'm going to keep it here as a good starting point for the next time 
+//the api needs to handle google sheet stuff.
+
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 import { JWT } from 'google-auth-library';
 

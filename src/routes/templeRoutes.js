@@ -48,13 +48,8 @@ router.get('/teamTotals', async (req, res) => {
 });
 
 router.get('/fetchTempleData', async (req,res) => {
-    if (isFetching) {
-        res.status(200).send("Fetch already running");
-    }
-    else {
-        fetchAndProcessData();
         res.status(200).send("Fetch started");
-    }
+        fetchAndProcessData();
 });
 
 router.get('/fetchSheetData', async (req,res) => {
