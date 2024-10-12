@@ -89,11 +89,20 @@ export const getBingoCompetitionData = async () => {
         const result = await client.query(
             'SELECT team_a_results, team_b_results FROM bingo_competition LIMIT 1'
         );
-        return result.rows[0];
+
+        if (result.rowCount === 0) {
+            return null; // No data found
+        }
+
+        return result.rows[0];  // Return the first row
+    } catch (error) {
+        console.error("Error fetching competition data:", error.message);
+        throw new Error("Database error");
     } finally {
         client.release();
     }
 };
+
 
 export const saveBingoCompetitionData = async (teamA, teamB) => {
     const client = await pool.connect();
@@ -101,25 +110,31 @@ export const saveBingoCompetitionData = async (teamA, teamB) => {
         const result = await client.query('SELECT id FROM bingo_competition LIMIT 1');
 
         if (result.rowCount === 0) {
+            // No data exists, insert new data
             await client.query(
                 `
                 INSERT INTO bingo_competition (team_a_results, team_b_results, created_at)
-                VALUES ($1, $2, NOW())
+                VALUES ($1::jsonb, $2::jsonb, NOW())
                 `,
-                [teamA, teamB]
+                [teamA, teamB]  // Passing arrays, PostgreSQL will handle them as JSONB
             );
         } else {
+            // Data exists, update the row
             await client.query(
                 `
                 UPDATE bingo_competition
-                SET team_a_results = $1, team_b_results = $2, created_at = NOW()
+                SET team_a_results = $1::jsonb, team_b_results = $2::jsonb, created_at = NOW()
                 WHERE id = $3
                 `,
                 [teamA, teamB, result.rows[0].id]
             );
         }
+    } catch (error) {
+        console.error("Error saving competition data:", error.message);
+        throw new Error("Database error");
     } finally {
         client.release();
     }
 };
+
 

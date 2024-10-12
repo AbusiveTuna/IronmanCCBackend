@@ -117,6 +117,7 @@ router.get('/justenTbow', async (req,res) => {
  */
 router.get('/lukas-data', async (req, res) => {
     try {
+        // Fetch the competition data
         let data = await getBingoCompetitionData();
 
         if (!data) {
@@ -135,17 +136,24 @@ router.get('/lukas-data', async (req, res) => {
                 { name: 'zulrah', count: 0 },
             ];
 
+            // Insert default data into the database
             await saveBingoCompetitionData(defaultTeamA, defaultTeamB);
 
+            // Fetch the newly inserted data
             data = await getBingoCompetitionData();
         }
 
-        res.json(data);
+        // Ensure proper structure in the response
+        res.json({
+            teamA: data.team_a_results || [],  // Always return valid arrays
+            teamB: data.team_b_results || []   // Always return valid arrays
+        });
     } catch (error) {
         console.error("Error fetching competition data:", error.message);
         res.status(500).send('Server error');
     }
 });
+
 
 /*
  * Route: Save Bingo competition results
