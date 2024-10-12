@@ -1,7 +1,7 @@
 import { Router } from 'express';
 const router = Router();
 
-import {  getCompetitionResults, getJustenTbow } from '../models/templeModels.js';
+import {  getCompetitionResults, getJustenTbow, getBingoCompetitionData, saveBingoCompetitionData } from '../models/templeModels.js';
 import { getSheetData } from '../models/sheetModels.js';
 import { fetchAndProcessData } from '../controllers/controller.js'
 import { grabPurpleInfo } from '../controllers/sheets.js';
@@ -108,6 +108,41 @@ router.get('/justenTbow', async (req,res) => {
         res.json(justenData);
     } else {
         res.status(404).send('No Justen Data Found');
+    }
+});
+
+/*
+ * Route: Get Bingo competition data
+ * Returns: JSON with results for teamA and teamB
+ */
+router.get('/lukas-data', async (req, res) => {
+    try {
+        const data = await getBingoCompetitionData();
+        if (data) {
+            res.json(data);
+        } else {
+            res.status(404).send('Competition data not found');
+        }
+    } catch (error) {
+        res.status(500).send('Server error');
+    }
+});
+
+/*
+ * Route: Save Bingo competition results
+ * Accepts: JSON with teamA and teamB results
+ */
+router.post('/save-lukas-data', async (req, res) => {
+    const { teamA, teamB } = req.body;
+    try {
+        if (!teamA || !teamB) {
+            return res.status(400).send('Invalid data structure');
+        }
+
+        await saveBingoCompetitionData(teamA, teamB);
+        res.status(200).send('Data saved successfully');
+    } catch (error) {
+        res.status(500).send('Server error');
     }
 });
 

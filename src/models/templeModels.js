@@ -83,3 +83,32 @@ export const getCompetitionResults = async (competitionId) => {
     }
 };
 
+export const getBingoCompetitionData = async () => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query(
+            'SELECT team_a_results, team_b_results FROM bingo_competition LIMIT 1'
+        );
+        return result.rows[0];
+    } finally {
+        client.release();
+    }
+};
+
+export const saveBingoCompetitionData = async (teamA, teamB) => {
+    const client = await pool.connect();
+    try {
+        await client.query(
+            `
+            INSERT INTO bingo_competition (team_a_results, team_b_results, created_at)
+            VALUES ($1, $2, NOW())
+            ON CONFLICT (id) 
+            DO UPDATE SET team_a_results = $1, team_b_results = $2, created_at = NOW()
+            `,
+            [teamA, teamB]
+        );
+    } finally {
+        client.release();
+    }
+};
+
