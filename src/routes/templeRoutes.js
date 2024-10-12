@@ -160,7 +160,7 @@ router.get('/lukas-data', async (req, res) => {
  * Accepts: JSON with teamA and teamB results
  */
 router.post('/save-lukas-data', async (req, res) => {
-    console.log(req.body);
+    console.log(req);
     const { teamA, teamB } = req.body;
 
     try {
