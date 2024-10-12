@@ -117,13 +117,32 @@ router.get('/justenTbow', async (req,res) => {
  */
 router.get('/lukas-data', async (req, res) => {
     try {
-        const data = await getBingoCompetitionData();
-        if (data) {
-            res.json(data);
-        } else {
-            res.status(404).send('Competition data not found');
+        let data = await getBingoCompetitionData();
+
+        if (!data) {
+            // Initialize default data if no competition data exists
+            const defaultTeamA = [
+                { name: 'arcane', count: 0 },
+                { name: 'craws', count: 0 },
+                { name: 'virtus', count: 0 },
+                { name: 'zulrah', count: 0 },
+            ];
+
+            const defaultTeamB = [
+                { name: 'arcane', count: 0 },
+                { name: 'craws', count: 0 },
+                { name: 'virtus', count: 0 },
+                { name: 'zulrah', count: 0 },
+            ];
+
+            await saveBingoCompetitionData(defaultTeamA, defaultTeamB);
+
+            data = await getBingoCompetitionData();
         }
+
+        res.json(data);
     } catch (error) {
+        console.error("Error fetching competition data:", error.message);
         res.status(500).send('Server error');
     }
 });
@@ -134,14 +153,16 @@ router.get('/lukas-data', async (req, res) => {
  */
 router.post('/save-lukas-data', async (req, res) => {
     const { teamA, teamB } = req.body;
+
     try {
-        if (!teamA || !teamB) {
-            return res.status(400).send('Invalid data structure');
+        if (!Array.isArray(teamA) || !Array.isArray(teamB)) {
+            return res.status(400).send('Invalid data structure. teamA and teamB must be arrays.');
         }
 
         await saveBingoCompetitionData(teamA, teamB);
         res.status(200).send('Data saved successfully');
     } catch (error) {
+        console.error("Error saving competition data:", error.message);
         res.status(500).send('Server error');
     }
 });
