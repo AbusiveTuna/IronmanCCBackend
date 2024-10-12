@@ -91,10 +91,10 @@ export const getBingoCompetitionData = async () => {
         );
 
         if (result.rowCount === 0) {
-            return null; // No data found
+            return null;
         }
 
-        return result.rows[0];  // Return the first row
+        return result.rows[0];
     } catch (error) {
         console.error("Error fetching competition data:", error.message);
         throw new Error("Database error");
@@ -121,7 +121,6 @@ export const saveBingoCompetitionData = async (teamA, teamB) => {
                 [validTeamA, validTeamB]
             );
         } else {
-            // Update existing data
             await client.query(
                 `
                 UPDATE bingo_competition

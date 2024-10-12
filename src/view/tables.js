@@ -41,7 +41,7 @@ const createTables = async () => {
         `);
 
         await client.query(`
-            DROP TABLE IF EXISTS bingo_competition;
+           
             CREATE TABLE bingo_competition (
                 id SERIAL PRIMARY KEY,
                 team_a_results JSONB NOT NULL,
@@ -55,5 +55,6 @@ const createTables = async () => {
         client.release();
     }
 };
+ // DROP TABLE IF EXISTS bingo_competition;
 
 export { createTables };
