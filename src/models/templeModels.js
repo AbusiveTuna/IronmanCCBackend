@@ -98,15 +98,26 @@ export const getBingoCompetitionData = async () => {
 export const saveBingoCompetitionData = async (teamA, teamB) => {
     const client = await pool.connect();
     try {
-        await client.query(
-            `
-            INSERT INTO bingo_competition (team_a_results, team_b_results, created_at)
-            VALUES ($1, $2, NOW())
-            ON CONFLICT (id) 
-            DO UPDATE SET team_a_results = $1, team_b_results = $2, created_at = NOW()
-            `,
-            [teamA, teamB]
-        );
+        const result = await client.query('SELECT id FROM bingo_competition LIMIT 1');
+
+        if (result.rowCount === 0) {
+            await client.query(
+                `
+                INSERT INTO bingo_competition (team_a_results, team_b_results, created_at)
+                VALUES ($1, $2, NOW())
+                `,
+                [teamA, teamB]
+            );
+        } else {
+            await client.query(
+                `
+                UPDATE bingo_competition
+                SET team_a_results = $1, team_b_results = $2, created_at = NOW()
+                WHERE id = $3
+                `,
+                [teamA, teamB, result.rows[0].id]
+            );
+        }
     } finally {
         client.release();
     }
