@@ -42,7 +42,7 @@ const createTables = async () => {
 
         await client.query(`
            
-            CREATE TABLE bingo_competition (
+            CREATE TABLE IF NOT EXISTS bingo_competition (
                 id SERIAL PRIMARY KEY,
                 team_a_results JSONB NOT NULL,
                 team_b_results JSONB NOT NULL,
