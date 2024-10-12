@@ -107,26 +107,30 @@ export const getBingoCompetitionData = async () => {
 export const saveBingoCompetitionData = async (teamA, teamB) => {
     const client = await pool.connect();
     try {
+        // Ensure teamA and teamB are valid JSON strings before inserting
+        const validTeamA = JSON.stringify(teamA);
+        const validTeamB = JSON.stringify(teamB);
+
         const result = await client.query('SELECT id FROM bingo_competition LIMIT 1');
 
         if (result.rowCount === 0) {
-            // No data exists, insert new data
+            // No data exists, insert default data
             await client.query(
                 `
                 INSERT INTO bingo_competition (team_a_results, team_b_results, created_at)
                 VALUES ($1::jsonb, $2::jsonb, NOW())
                 `,
-                [teamA, teamB]  // Passing arrays, PostgreSQL will handle them as JSONB
+                [validTeamA, validTeamB]  // Pass properly formatted JSON
             );
         } else {
-            // Data exists, update the row
+            // Update existing data
             await client.query(
                 `
                 UPDATE bingo_competition
                 SET team_a_results = $1::jsonb, team_b_results = $2::jsonb, created_at = NOW()
                 WHERE id = $3
                 `,
-                [teamA, teamB, result.rows[0].id]
+                [validTeamA, validTeamB, result.rows[0].id]
             );
         }
     } catch (error) {
@@ -136,5 +140,6 @@ export const saveBingoCompetitionData = async (teamA, teamB) => {
         client.release();
     }
 };
+
 
 
