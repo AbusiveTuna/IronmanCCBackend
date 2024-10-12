@@ -1,5 +1,6 @@
 import { Router } from 'express';
 const router = Router();
+router.use(express.json());
 
 import {  getCompetitionResults, getJustenTbow, getBingoCompetitionData, saveBingoCompetitionData } from '../models/templeModels.js';
 import { getSheetData } from '../models/sheetModels.js';
@@ -160,7 +161,8 @@ router.get('/lukas-data', async (req, res) => {
  * Accepts: JSON with teamA and teamB results
  */
 router.post('/save-lukas-data', async (req, res) => {
-    console.log(req.body);
+    console.log('Headers:', req.headers);
+    console.log('Body:', req.body);
     const { teamA, teamB } = req.body;
 
     try {
