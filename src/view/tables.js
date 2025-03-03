@@ -4,57 +4,24 @@ const createTables = async () => {
     const client = await pool.connect();
     try {
         await client.query(`
-            CREATE TABLE IF NOT EXISTS temple_competition_data (
-                competition_id INTEGER PRIMARY KEY,
-                results JSONB NOT NULL
-            )
-        `);
-
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS competition_results (
-                competition_id INTEGER PRIMARY KEY,
-                results JSONB NOT NULL,
-                team_totals JSONB NOT NULL
-            )
-        `);
-
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS sheet_data (
-                competition_id INTEGER PRIMARY KEY,
-                data JSONB NOT NULL
-            )
-        `);
-
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS purple_data (
-                competition_id INTEGER PRIMARY KEY,
-                data JSONB NOT NULL
-            )
-        `);
-
-        await client.query(`
-            CREATE TABLE IF NOT EXISTS justen_tbow (
-                id SERIAL PRIMARY KEY,
-                kc INTEGER NOT NULL,
-                rank INTEGER NOT NULL
-            )
-        `);
-
-        await client.query(`
-           
-            CREATE TABLE IF NOT EXISTS bingo_competition (
-                id SERIAL PRIMARY KEY,
-                team_a_results JSONB NOT NULL,
-                team_b_results JSONB NOT NULL,
-                created_at TIMESTAMPTZ DEFAULT NOW()
+            CREATE TABLE IF NOT EXISTS battleship_bingo (
+                competition_id SERIAL PRIMARY KEY,
+                team_one_name VARCHAR(255) NOT NULL,
+                captain_one_name VARCHAR(255) NOT NULL,
+                team_one_board JSONB NOT NULL,
+                team_two_name VARCHAR(255) NOT NULL,
+                captain_two_name VARCHAR(255) NOT NULL,
+                team_two_board JSONB NOT NULL,
+                shot_codes JSONB NOT NULL DEFAULT '[]'::JSONB
             );
         `);
         
-
+        console.log("Tables created successfully.");
+    } catch (err) {
+        console.error("Error creating tables:", err);
     } finally {
         client.release();
     }
 };
- // DROP TABLE IF EXISTS bingo_competition;
 
 export { createTables };

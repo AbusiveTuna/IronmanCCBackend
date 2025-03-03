@@ -1,15 +1,14 @@
 import express from 'express';
 import cors from 'cors';
-import { createTables } from './src/view/tables.js';
-import templeRoutes from './src/routes/templeRoutes.js';
-import { fetchJustenData, fetchAndProcessData } from './src/controllers/controller.js'
+import { createTables } from './src/view/tables.js'
+import battleshipRoutes from './battleshipRoutes.js';
+
 const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json())
 app.use(cors());
-app.use(templeRoutes);
-
+app.use(battleshipRoutes);
 
 export default app;
 
@@ -17,11 +16,7 @@ app.listen(port, async () => {
     console.log("Running on port: " + port);
     await createTables();
 
-    // await fetchAndProcessData();
-    await fetchJustenData();
-
     setInterval(() => {
-        // fetchAndProcessData();
-        fetchJustenData();
+
     }, 3600000);
 });
