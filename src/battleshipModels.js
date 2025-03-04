@@ -80,7 +80,10 @@ export const getMaskedGameState = async (compId) => {
     const client = await pool.connect();
     try {
         const result = await client.query(
-            `SELECT team_one_revealed, team_two_revealed FROM battleship_bingo WHERE competition_id = $1`,
+            `SELECT team_one_name, captain_one_name, team_one_revealed, 
+                    team_two_name, captain_two_name, team_two_revealed 
+             FROM battleship_bingo 
+             WHERE competition_id = $1`,
             [compId]
         );
 
@@ -88,10 +91,23 @@ export const getMaskedGameState = async (compId) => {
             return null;
         }
 
+        const { 
+            team_one_name, captain_one_name, team_one_revealed, 
+            team_two_name, captain_two_name, team_two_revealed 
+        } = result.rows[0];
+
         return {
             competitionId: compId,
-            teamOne: { board: result.rows[0].team_one_revealed || [] },
-            teamTwo: { board: result.rows[0].team_two_revealed || [] }
+            teamOne: { 
+                name: team_one_name, 
+                captain: captain_one_name, 
+                board: team_one_revealed || [] 
+            },
+            teamTwo: { 
+                name: team_two_name, 
+                captain: captain_two_name, 
+                board: team_two_revealed || [] 
+            }
         };
 
     } catch (error) {
