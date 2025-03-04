@@ -3,12 +3,8 @@ import pool from './db.js';
 const createTables = async () => {
     const client = await pool.connect();
     try {
-        console.log("Dropping existing table if it exists...");
-        await client.query(`DROP TABLE IF EXISTS battleship_bingo CASCADE;`);
-
-        console.log("Creating new table...");
         await client.query(`
-            CREATE TABLE battleship_bingo (
+            CREATE TABLE IF NOT EXISTS battleship_bingo (
                 competition_id SERIAL PRIMARY KEY,
                 team_one_name VARCHAR(255) NOT NULL,
                 captain_one_name VARCHAR(255) NOT NULL,

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import express from 'express';
-import { createNewGame, saveBoardPlacement, getCompetitionById, getAllCompetitionIds } from './battleshipModels.js';
+import { createNewGame, saveBoardPlacement, getCompetitionById, getAllCompetitionIds, getMaskedGameState } from './battleshipModels.js';
 
 const router = Router();
 router.use(express.json());
