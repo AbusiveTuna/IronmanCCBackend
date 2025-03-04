@@ -136,15 +136,24 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
 
         let { team_one_board, team_two_board, team_one_revealed, team_two_revealed, shot_codes } = gameResult.rows[0];
 
+        // Debugging log to verify what we are working with before parsing
+        console.log("Raw Database Values Before Parsing:");
+        console.log("team_one_board:", typeof team_one_board, team_one_board);
+        console.log("team_two_board:", typeof team_two_board, team_two_board);
+        console.log("team_one_revealed:", typeof team_one_revealed, team_one_revealed);
+        console.log("team_two_revealed:", typeof team_two_revealed, team_two_revealed);
+        console.log("shot_codes:", typeof shot_codes, shot_codes);
+
         try {
-            team_one_board = JSON.parse(team_one_board);
-            team_two_board = JSON.parse(team_two_board);
-            team_one_revealed = team_one_revealed ? JSON.parse(team_one_revealed) : [];
-            team_two_revealed = team_two_revealed ? JSON.parse(team_two_revealed) : [];
-            shot_codes = JSON.parse(shot_codes);
+            team_one_board = typeof team_one_board === "string" ? JSON.parse(team_one_board) : team_one_board;
+            team_two_board = typeof team_two_board === "string" ? JSON.parse(team_two_board) : team_two_board;
+            team_one_revealed = typeof team_one_revealed === "string" ? JSON.parse(team_one_revealed) : team_one_revealed || [];
+            team_two_revealed = typeof team_two_revealed === "string" ? JSON.parse(team_two_revealed) : team_two_revealed || [];
+            shot_codes = typeof shot_codes === "string" ? JSON.parse(shot_codes) : shot_codes;
+
         } catch (parseError) {
             console.error("Error parsing JSON fields:", parseError);
-            return { error: "Invalid game data format." };
+            return { error: `Invalid game data format: ${parseError.message}` };
         }
 
         console.log("Loaded game data successfully.");
@@ -185,7 +194,6 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
         client.release();
     }
 };
-
 
 
 export const getCompetitionById = async (compId) => {
