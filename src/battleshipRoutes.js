@@ -57,13 +57,17 @@ router.post("/battleship-fire-shot", async (req, res) => {
         const result = await fireShot(compId, team, row, col, shotCode);
 
         if (result.error) {
+            console.error(`Shot processing error: ${result.error}`);
             return res.status(400).json({ error: result.error });
         }
 
         res.json(result);
     } catch (error) {
-        console.error("Error processing shot:", error);
-        res.status(500).json({ error: "Internal server error." });
+        console.error("Unhandled server error:", error);
+
+        return res.status(500).json({
+            error:  error.message
+        });
     }
 });
 
