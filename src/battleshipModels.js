@@ -139,8 +139,8 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
         try {
             team_one_board = JSON.parse(team_one_board);
             team_two_board = JSON.parse(team_two_board);
-            team_one_revealed = JSON.parse(team_one_revealed);
-            team_two_revealed = JSON.parse(team_two_revealed);
+            team_one_revealed = team_one_revealed ? JSON.parse(team_one_revealed) : [];
+            team_two_revealed = team_two_revealed ? JSON.parse(team_two_revealed) : [];
             shot_codes = JSON.parse(shot_codes);
         } catch (parseError) {
             console.error("Error parsing JSON fields:", parseError);
