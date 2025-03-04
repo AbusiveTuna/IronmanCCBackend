@@ -118,6 +118,67 @@ export const getMaskedGameState = async (compId) => {
     }
 };
 
+export const fireShot = async (compId, team, row, col, shotCode) => {
+    const client = await pool.connect();
+    try {
+        // Fetch game data
+        const gameResult = await client.query(
+            `SELECT team_one_board, team_two_board, team_one_revealed, team_two_revealed, shot_codes 
+             FROM battleship_bingo WHERE competition_id = $1`,
+            [compId]
+        );
+
+        if (gameResult.rows.length === 0) {
+            return { error: "Game not found." };
+        }
+
+        let { team_one_board, team_two_board, team_one_revealed, team_two_revealed, shot_codes } = gameResult.rows[0];
+
+        team_one_board = JSON.parse(team_one_board);
+        team_two_board = JSON.parse(team_two_board);
+        team_one_revealed = JSON.parse(team_one_revealed);
+        team_two_revealed = JSON.parse(team_two_revealed);
+        shot_codes = JSON.parse(shot_codes);
+
+        // Validate shot code
+        if (!shot_codes.includes(shotCode)) {
+            return { error: "Invalid shot code." };
+        }
+
+        // Determine which board is being fired upon
+        let targetBoard = team === "teamOne" ? team_two_board : team_one_board;
+        let revealedBoard = team === "teamOne" ? team_two_revealed : team_one_revealed;
+        let revealedColumn = team === "teamOne" ? "team_two_revealed" : "team_one_revealed";
+
+        // Check if the shot has already been fired
+        if (revealedBoard.some((tile) => tile.row === row && tile.col === col)) {
+            return { error: "This tile has already been fired upon." };
+        }
+
+        // Check if it's a hit or a miss
+        const isHit = targetBoard.some((tile) => tile.row === row && tile.col === col);
+        revealedBoard.push({ row, col, isHit });
+
+        // Remove used shot code
+        shot_codes = shot_codes.filter(code => code !== shotCode);
+
+        // Update the database
+        await client.query(
+            `UPDATE battleship_bingo SET ${revealedColumn} = $1, shot_codes = $2 WHERE competition_id = $3`,
+            [JSON.stringify(revealedBoard), JSON.stringify(shot_codes), compId]
+        );
+
+        return { row, col, isHit };
+
+    } catch (error) {
+        console.error("Error processing shot:", error);
+        throw error;
+    } finally {
+        client.release();
+    }
+};
+
+
 export const getCompetitionById = async (compId) => {
     const client = await pool.connect();
     try {

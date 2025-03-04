@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import express from 'express';
-import { createNewGame, saveBoardPlacement, getCompetitionById, getAllCompetitionIds, getMaskedGameState } from './battleshipModels.js';
+import { createNewGame, saveBoardPlacement, getCompetitionById, getAllCompetitionIds, getMaskedGameState, fireShot } from './battleshipModels.js';
 
 const router = Router();
 router.use(express.json());
@@ -43,6 +43,30 @@ router.post('/battleship-save-board', async (req, res) => {
         res.status(500).json({ error: "Internal server error." });
     }
 });
+
+router.post("/battleship-fire-shot", async (req, res) => {
+    const { compId, team, row, col, shotCode } = req.body;
+
+    console.log(`Incoming shot: CompID=${compId}, Team=${team}, Row=${row}, Col=${col}, Code=${shotCode}`);
+
+    if (!compId || !team || row === undefined || col === undefined || !shotCode) {
+        return res.status(400).json({ error: "Invalid shot data." });
+    }
+
+    try {
+        const result = await fireShot(compId, team, row, col, shotCode);
+
+        if (result.error) {
+            return res.status(400).json({ error: result.error });
+        }
+
+        res.json(result);
+    } catch (error) {
+        console.error("Error processing shot:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+});
+
 
 router.get("/battleship-game/:compId", async (req, res) => {
     const { compId } = req.params;
