@@ -44,13 +44,13 @@ export const saveBoardPlacement = async (captainName, compId, placedShips) => {
         let columnToUpdate;
 
         if (captainName == captain_one_name) {
-            if (team_one_board !== "[]") {
+            if (Array.isArray(team_one_board) && team_one_board.length > 0) {
                 console.log("Team One board already submitted. Cannot overwrite.");
                 throw new Error("Team one board already there");
             }
             columnToUpdate = "team_one_board";
         } else if (captainName === captain_two_name) {
-            if (team_two_board !== "[]") {
+            if (Array.isArray(team_two_board) && team_two_board.length > 0) {
                 console.log("Team Two board already submitted. Cannot overwrite.");
                 throw new Error("Team two board already there");
             }
