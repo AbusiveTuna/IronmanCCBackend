@@ -124,7 +124,7 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
         console.log(`Processing shot for CompID=${compId}, Team=${team}, Row=${row}, Col=${col}, Code=${shotCode}`);
 
         const gameResult = await client.query(
-            `SELECT team_one_board, team_two_board, team_one_revealed, team_two_revealed, shot_codes 
+            `SELECT team_one_board, team_two_board, team_one_name, team_two_name, team_one_revealed, team_two_revealed, shot_codes 
              FROM battleship_bingo WHERE competition_id = $1`,
             [compId]
         );
@@ -134,11 +134,13 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
             return { error: "Game not found." };
         }
 
-        let { team_one_board, team_two_board, team_one_revealed, team_two_revealed, shot_codes } = gameResult.rows[0];
+        let { team_one_board, team_two_board, team_one_name, team_two_name, team_one_revealed, team_two_revealed, shot_codes } = gameResult.rows[0];
 
         try {
             team_one_board = typeof team_one_board === "string" ? JSON.parse(team_one_board) : team_one_board;
             team_two_board = typeof team_two_board === "string" ? JSON.parse(team_two_board) : team_two_board;
+            team_one_name = typeof team_one_name === "string" ? JSON.parse(team_one_name) : team_one_name;
+            team_two_name = typeof team_two_name === "string" ? JSON.parse(team_two_name) : team_two_name;
             team_one_revealed = typeof team_one_revealed === "string" ? JSON.parse(team_one_revealed) : team_one_revealed || [];
             team_two_revealed = typeof team_two_revealed === "string" ? JSON.parse(team_two_revealed) : team_two_revealed || [];
             shot_codes = typeof shot_codes === "string" ? JSON.parse(shot_codes) : shot_codes;
@@ -155,10 +157,21 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
             return { error: "Invalid shot code." };
         }
 
-        let targetBoard = team === "teamOne" ? team_two_board : team_one_board;
-        let revealedBoard = team === "teamOne" ? team_two_revealed : team_one_revealed;
-        let revealedColumn = team === "teamOne" ? "team_two_revealed" : "team_one_revealed";
-
+        let targetBoard;
+        let revealedBoard;
+        let revealedColumn;
+        if(team == team_one_name) {
+            targetBoard = team_one_board;
+            revealedBoard = team_one_revealed;
+            revealedColumn = "team_one_revealed";
+        } else if (team == team_two_name) {
+            targetBoard = team_two_board;
+            revealedBoard = team_two_revealed;
+            revealedColumn = "team_two_revealed";
+        } else {
+            return { error: "Could not find team:"}
+        }
+         
         if (revealedBoard.some((tile) => tile.row === row && tile.col === col)) {
             console.warn(`Tile already fired upon: Row=${row}, Col=${col}`);
             return { error: "This tile has already been fired upon." };
