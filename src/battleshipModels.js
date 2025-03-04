@@ -61,7 +61,7 @@ export const saveBoardPlacement = async (captainName, compId, placedShips) => {
         }
 
         await client.query(
-            `UPDATE competitions 
+            `UPDATE battleship_bingo 
              SET ${columnToUpdate} = $1 
              WHERE competition_id = $2`,
             [JSON.stringify(placedShips), compId]
