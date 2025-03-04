@@ -1,14 +1,13 @@
 import express from 'express';
 import cors from 'cors';
 import { createTables } from './src/view/tables.js'
-import battleshipRoutes from './battleshipRoutes.js';
+import battleshipRoutes from './src/battleshipRoutes.js';
 
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors({origin: '*'}));
-
 app.use(express.json())
+app.use(cors({origin: '*'}));
 app.use(battleshipRoutes);
 
 export default app;
