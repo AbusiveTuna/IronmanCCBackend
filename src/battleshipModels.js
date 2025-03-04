@@ -1,4 +1,4 @@
-import pool from "../db.js";
+import pool from "./view/db.js";
 
 export const createNewGame = async (captainOne, teamOne, captainTwo, teamTwo) => {
     const client = await pool.connect();
