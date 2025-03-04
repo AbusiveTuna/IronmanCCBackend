@@ -136,14 +136,6 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
 
         let { team_one_board, team_two_board, team_one_revealed, team_two_revealed, shot_codes } = gameResult.rows[0];
 
-        // Debugging log to verify what we are working with before parsing
-        console.log("Raw Database Values Before Parsing:");
-        console.log("team_one_board:", typeof team_one_board, team_one_board);
-        console.log("team_two_board:", typeof team_two_board, team_two_board);
-        console.log("team_one_revealed:", typeof team_one_revealed, team_one_revealed);
-        console.log("team_two_revealed:", typeof team_two_revealed, team_two_revealed);
-        console.log("shot_codes:", typeof shot_codes, shot_codes);
-
         try {
             team_one_board = typeof team_one_board === "string" ? JSON.parse(team_one_board) : team_one_board;
             team_two_board = typeof team_two_board === "string" ? JSON.parse(team_two_board) : team_two_board;
@@ -172,12 +164,12 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
             return { error: "This tile has already been fired upon." };
         }
 
-        const isHit = targetBoard.some((tile) => tile.row === row && tile.col === col);
-        revealedBoard.push({ row, col, isHit });
+        const hitShip = targetBoard.some((tile) => tile.row === row && tile.col === col);
+        revealedBoard.push({ row, col, isHit: true, hitShip });
 
         shot_codes = shot_codes.filter(code => code !== shotCode);
 
-        console.log(`Shot result: ${isHit ? "Hit" : "Miss"} at Row=${row}, Col=${col}`);
+        console.log(`Shot result: ${hitShip ? "Hit" : "Miss"} at Row=${row}, Col=${col}`);
 
         await client.query(
             `UPDATE battleship_bingo SET ${revealedColumn} = $1, shot_codes = $2 WHERE competition_id = $3`,
@@ -185,7 +177,7 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
         );
 
         console.log("Shot successfully recorded in database.");
-        return { row, col, isHit };
+        return { row, col, isHit: true, hitShip }
 
     } catch (error) {
         console.error("Error processing shot:", error);
