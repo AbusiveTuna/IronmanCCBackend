@@ -76,6 +76,32 @@ export const saveBoardPlacement = async (captainName, compId, placedShips) => {
     }
 };
 
+export const getMaskedGameState = async (compId) => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query(
+            `SELECT team_one_revealed, team_two_revealed FROM battleship_bingo WHERE competition_id = $1`,
+            [compId]
+        );
+
+        if (result.rows.length === 0) {
+            return null;
+        }
+
+        return {
+            competitionId: compId,
+            teamOne: { board: result.rows[0].team_one_revealed || [] },
+            teamTwo: { board: result.rows[0].team_two_revealed || [] }
+        };
+
+    } catch (error) {
+        console.error("Error retrieving masked game state:", error);
+        throw error;
+    } finally {
+        client.release();
+    }
+};
+
 export const getCompetitionById = async (compId) => {
     const client = await pool.connect();
     try {

@@ -48,6 +48,22 @@ router.get("/battleship-game/:compId", async (req, res) => {
     const { compId } = req.params;
 
     try {
+        const gameData = await getMaskedGameState(compId);
+        if (!gameData) {
+            return res.status(404).json({ error: "Competition not found." });
+        }
+
+        res.json(gameData);
+    } catch (error) {
+        console.error("Error fetching game data:", error);
+        res.status(500).json({ error: "Internal server error." });
+    }
+});
+
+router.get("/admin-battleship-game/:compId", async (req, res) => {
+    const { compId } = req.params;
+
+    try {
         const gameData = await getCompetitionById(compId);
         if (!gameData) {
             return res.status(404).json({ error: "Competition not found." });

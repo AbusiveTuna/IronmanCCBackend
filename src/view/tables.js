@@ -16,6 +16,20 @@ const createTables = async () => {
             );
         `);
         
+        const result = await client.query(`
+            SELECT column_name FROM information_schema.columns
+            WHERE table_name='battleship_bingo' AND column_name IN ('team_one_revealed', 'team_two_revealed');
+        `);
+    
+        const existingColumns = result.rows.map(row => row.column_name);
+    
+        if (!existingColumns.includes('team_one_revealed')) {
+            await client.query(`ALTER TABLE battleship_bingo ADD COLUMN team_one_revealed JSONB DEFAULT '[]'`);
+        }
+        if (!existingColumns.includes('team_two_revealed')) {
+            await client.query(`ALTER TABLE battleship_bingo ADD COLUMN team_two_revealed JSONB DEFAULT '[]'`);
+        }
+        
         console.log("Tables created successfully.");
     } catch (err) {
         console.error("Error creating tables:", err);
