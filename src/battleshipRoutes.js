@@ -31,9 +31,9 @@ router.post('/battleship-save-board', async (req, res) => {
     }
 
     try {
-        const success = await saveBoardPlacement(captainName, compId, placedShips);
-        if (!success) {
-            return res.status(400).json({ error: "Board already submitted. Cannot modify." });
+        const result = await saveBoardPlacement(captainName, compId, placedShips);
+        if (!result.success) {
+            return res.status(400).json({ error: result.error });
         }
 
         res.json({ message: "Board saved successfully." });

@@ -37,7 +37,7 @@ export const saveBoardPlacement = async (captainName, compId, placedShips) => {
 
         if (result.rows.length === 0) {
             console.error("Competition not found.");
-            return false;
+            throw new Error("comp not found");
         }
 
         const { captain_one_name, captain_two_name, team_one_board, team_two_board } = result.rows[0];
@@ -46,18 +46,18 @@ export const saveBoardPlacement = async (captainName, compId, placedShips) => {
         if (captainName == captain_one_name) {
             if (team_one_board !== "[]") {
                 console.log("Team One board already submitted. Cannot overwrite.");
-                return false;
+                throw new Error("Team one board already there");
             }
             columnToUpdate = "team_one_board";
         } else if (captainName === captain_two_name) {
             if (team_two_board !== "[]") {
                 console.log("Team Two board already submitted. Cannot overwrite.");
-                return false;
+                throw new Error("Team two board already there");
             }
             columnToUpdate = "team_two_board";
         } else {
             console.log("Captain name does not match any team.");
-            return false;
+            throw new Error("Tcant find captain");
         }
 
         await client.query(
@@ -67,10 +67,10 @@ export const saveBoardPlacement = async (captainName, compId, placedShips) => {
             [JSON.stringify(placedShips), compId]
         );
 
-        return true;
+        return { success: true, message: "Board saved successfully." };
     } catch (error) {
         console.error("Error saving board placement:", error);
-        throw error;
+        return { success: false, error: error.message };
     } finally {
         client.release();
     }
