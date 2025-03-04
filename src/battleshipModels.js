@@ -139,8 +139,8 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
         try {
             team_one_board = typeof team_one_board === "string" ? JSON.parse(team_one_board) : team_one_board;
             team_two_board = typeof team_two_board === "string" ? JSON.parse(team_two_board) : team_two_board;
-            team_one_name = typeof team_one_name === "string" ? JSON.parse(team_one_name) : team_one_name;
-            team_two_name = typeof team_two_name === "string" ? JSON.parse(team_two_name) : team_two_name;
+            // team_one_name = typeof team_one_name === "string" ? JSON.parse(team_one_name) : team_one_name;
+            // team_two_name = typeof team_two_name === "string" ? JSON.parse(team_two_name) : team_two_name;
             team_one_revealed = typeof team_one_revealed === "string" ? JSON.parse(team_one_revealed) : team_one_revealed || [];
             team_two_revealed = typeof team_two_revealed === "string" ? JSON.parse(team_two_revealed) : team_two_revealed || [];
             shot_codes = typeof shot_codes === "string" ? JSON.parse(shot_codes) : shot_codes;
