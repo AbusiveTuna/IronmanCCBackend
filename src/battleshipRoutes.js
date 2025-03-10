@@ -71,7 +71,6 @@ router.post("/battleship-fire-shot", async (req, res) => {
     }
 });
 
-
 router.get("/battleship-game/:compId", async (req, res) => {
     const { compId } = req.params;
 

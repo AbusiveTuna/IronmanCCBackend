@@ -4,8 +4,6 @@ const createTables = async () => {
     const client = await pool.connect();
     try {
         await client.query(`
-            DROP TABLE IF EXISTS battleship_bingo;
-            
             CREATE TABLE IF NOT EXISTS battleship_bingo (
                 competition_id SERIAL PRIMARY KEY,
                 team_one_name VARCHAR(255) NOT NULL,
