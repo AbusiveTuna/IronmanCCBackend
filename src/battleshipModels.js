@@ -158,6 +158,11 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
         let shot_codes;
         let other_team_codes;
         let codes_column;
+
+        //While confusing I think this works for now.
+        //Basically if the team name is team one, that means the input is firing on team one.
+        //So that means it should be team two who is firing, therefore the board being hit is team one
+        //and the shot codes we check should be team twos.
         if(team == team_one_name) {
             targetBoard = team_one_board;
             revealedBoard = team_one_revealed;
