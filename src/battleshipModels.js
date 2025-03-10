@@ -3,13 +3,14 @@ import pool from "./view/db.js";
 export const createNewGame = async (captainOne, teamOne, captainTwo, teamTwo) => {
     const client = await pool.connect();
     try {
-        const shotCodes = generateShotCodes();
+        const shotCodesA = generateShotCodes();
+        const shotCodesB = generateShotCodes();
         const result = await client.query(
             `INSERT INTO battleship_bingo (team_one_name, captain_one_name, team_one_board, 
-                                       team_two_name, captain_two_name, team_two_board, shot_codes) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7) 
+                                       team_two_name, captain_two_name, team_two_board, team_one_shot_codes, team_two_shot_codes) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
              RETURNING competition_id`,
-            [teamOne, captainOne, '[]', teamTwo, captainTwo, '[]', JSON.stringify(shotCodes)]
+            [teamOne, captainOne, '[]', teamTwo, captainTwo, '[]', JSON.stringify(shotCodesA), JSON.stringify(shotCodesB)]
         );
 
         const competitionId = result.rows[0].competition_id;
@@ -124,7 +125,7 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
         console.log(`Processing shot for CompID=${compId}, Team=${team}, Row=${row}, Col=${col}, Code=${shotCode}`);
 
         const gameResult = await client.query(
-            `SELECT team_one_board, team_two_board, team_one_name, team_two_name, team_one_revealed, team_two_revealed, shot_codes 
+            `SELECT team_one_board, team_two_board, team_one_name, team_two_name, team_one_revealed, team_two_revealed, team_one_shot_codes, team_two_shot_codes 
              FROM battleship_bingo WHERE competition_id = $1`,
             [compId]
         );
@@ -134,14 +135,15 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
             return { error: "Game not found." };
         }
 
-        let { team_one_board, team_two_board, team_one_name, team_two_name, team_one_revealed, team_two_revealed, shot_codes } = gameResult.rows[0];
+        let { team_one_board, team_two_board, team_one_name, team_two_name, team_one_revealed, team_two_revealed, team_one_shot_codes, team_two_shot_codes } = gameResult.rows[0];
 
         try {
             team_one_board = typeof team_one_board === "string" ? JSON.parse(team_one_board) : team_one_board;
             team_two_board = typeof team_two_board === "string" ? JSON.parse(team_two_board) : team_two_board;
             team_one_revealed = typeof team_one_revealed === "string" ? JSON.parse(team_one_revealed) : team_one_revealed || [];
             team_two_revealed = typeof team_two_revealed === "string" ? JSON.parse(team_two_revealed) : team_two_revealed || [];
-            shot_codes = typeof shot_codes === "string" ? JSON.parse(shot_codes) : shot_codes;
+            team_one_shot_codes = typeof team_one_shot_codes === "string" ? JSON.parse(team_one_shot_codes) : team_one_shot_codes;
+            team_two_shot_codes = typeof team_two_shot_codes === "string" ? JSON.parse(team_two_shot_codes) : team_two_shot_codes;
 
         } catch (parseError) {
             console.error("Error parsing JSON fields:", parseError);
@@ -150,24 +152,34 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
 
         console.log("Loaded game data successfully.");
 
-        if (!shot_codes.includes(shotCode)) {
-            console.warn("Invalid shot code attempted:", shotCode);
-            return { error: "Invalid shot code." };
-        }
-
         let targetBoard;
         let revealedBoard;
         let revealedColumn;
+        let shot_codes;
+        let other_team_codes;
         if(team == team_one_name) {
             targetBoard = team_one_board;
             revealedBoard = team_one_revealed;
             revealedColumn = "team_one_revealed";
+            shot_codes = team_one_shot_codes;
+            other_team_codes = team_two_shot_codes;
         } else if (team == team_two_name) {
             targetBoard = team_two_board;
             revealedBoard = team_two_revealed;
             revealedColumn = "team_two_revealed";
+            shot_codes = team_two_shot_codes;
+            other_team_codes = team_one_shot_codes;
         } else {
             return { error: "Could not find team:"}
+        }
+
+        if (!shot_codes.includes(shotCode)) {
+            if(other_team_codes.includes(shotCode)) {
+                return { error: "You're firing at your own team!" };
+            } else {
+                console.warn("Invalid shot code attempted:", shotCode);
+                return { error: "Invalid shot code." };
+            }
         }
          
         if (revealedBoard.some((tile) => tile.row === row && tile.col === col)) {
@@ -234,13 +246,13 @@ export const getAllCompetitionIds = async () => {
 };
 
 
-const generateShotCodes = (count = 200) => {
+const generateShotCodes = (count = 100) => {
     const codes = new Set();
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     while (codes.size < count) {
         let code = "";
-        for (let i = 0; i < 8; i++) {
+        for (let i = 0; i < 10; i++) {
             code += characters.charAt(Math.floor(Math.random() * characters.length));
         }
         codes.add(code);
