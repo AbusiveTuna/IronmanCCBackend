@@ -5,12 +5,17 @@ export const createNewGame = async (captainOne, teamOne, captainTwo, teamTwo) =>
     try {
         const shotCodesA = generateShotCodes();
         const shotCodesB = generateShotCodes();
+        const tiles = Array.from({ length: 100 }, (_, index) => ({
+            TileNumber: index + 1,
+            IsCompleted: false
+          }));
+
         const result = await client.query(
             `INSERT INTO battleship_bingo (team_one_name, captain_one_name, team_one_board, 
-                                       team_two_name, captain_two_name, team_two_board, team_one_shot_codes, team_two_shot_codes) 
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+                                       team_two_name, captain_two_name, team_two_board, team_one_shot_codes, team_two_shot_codes, team_one_tiles, team_two_tiles) 
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
              RETURNING competition_id`,
-            [teamOne, captainOne, '[]', teamTwo, captainTwo, '[]', JSON.stringify(shotCodesA), JSON.stringify(shotCodesB)]
+            [teamOne, captainOne, '[]', teamTwo, captainTwo, '[]', JSON.stringify(shotCodesA), JSON.stringify(shotCodesB),JSON.stringify(tiles),JSON.stringify(tiles)]
         );
 
         const competitionId = result.rows[0].competition_id;

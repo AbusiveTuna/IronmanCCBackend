@@ -4,6 +4,8 @@ const createTables = async () => {
     const client = await pool.connect();
     try {
         await client.query(`
+            DROP TABLE IF EXISTS battleship_bingo;
+            
             CREATE TABLE IF NOT EXISTS battleship_bingo (
                 competition_id SERIAL PRIMARY KEY,
                 team_one_name VARCHAR(255) NOT NULL,
@@ -14,6 +16,8 @@ const createTables = async () => {
                 team_two_board JSONB NOT NULL,
                 team_one_shot_codes JSONB NOT NULL DEFAULT '[]'::JSONB,
                 team_two_shot_codes JSONB NOT NULL DEFAULT '[]'::JSONB,
+                team_one_tiles JSONB DEFAULT '[]'::JSONB,
+                team_two_tiles JSONB DEFAULT '[]'::JSONB,
                 team_one_revealed JSONB DEFAULT '[]'::JSONB,
                 team_two_revealed JSONB DEFAULT '[]'::JSONB
             );
