@@ -157,18 +157,21 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
         let revealedColumn;
         let shot_codes;
         let other_team_codes;
+        let codes_column;
         if(team == team_one_name) {
             targetBoard = team_one_board;
             revealedBoard = team_one_revealed;
             revealedColumn = "team_one_revealed";
-            shot_codes = team_one_shot_codes;
-            other_team_codes = team_two_shot_codes;
+            shot_codes = team_two_shot_codes;
+            other_team_codes = team_one_shot_codes;
+            codes_column = "team_two_shot_codes";
         } else if (team == team_two_name) {
             targetBoard = team_two_board;
             revealedBoard = team_two_revealed;
             revealedColumn = "team_two_revealed";
-            shot_codes = team_two_shot_codes;
-            other_team_codes = team_one_shot_codes;
+            shot_codes = team_one_shot_codes;
+            other_team_codes = team_two_shot_codes;
+            codes_column = "team_one_shot_codes";
         } else {
             return { error: "Could not find team:"}
         }
@@ -195,7 +198,7 @@ export const fireShot = async (compId, team, row, col, shotCode) => {
         console.log(`Shot result: ${hitShip ? "Hit" : "Miss"} at Row=${row}, Col=${col}`);
 
         await client.query(
-            `UPDATE battleship_bingo SET ${revealedColumn} = $1, shot_codes = $2 WHERE competition_id = $3`,
+            `UPDATE battleship_bingo SET ${revealedColumn} = $1, ${codes_column} = $2 WHERE competition_id = $3`,
             [JSON.stringify(revealedBoard), JSON.stringify(shot_codes), compId]
         );
 
