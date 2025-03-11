@@ -82,6 +82,89 @@ export const saveBoardPlacement = async (captainName, compId, placedShips) => {
     }
 };
 
+export const getTileData = async (teamName, compId) => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query(
+            `SELECT team_one_name, team_two_name, team_one_tiles, team_two_tiles
+             FROM battleship_bingo 
+             WHERE competition_id = $1`,
+            [compId]
+        );
+
+        if (result.rows.length === 0) {
+            return null;
+        }
+
+        const { team_one_name, team_two_name, team_one_tiles, team_two_tiles } = result.rows[0];
+
+        // Decide which column to return based on the provided teamName
+        let tileData;
+        if (teamName === team_one_name) {
+            tileData = team_one_tiles;
+        } else if (teamName === team_two_name) {
+            tileData = team_two_tiles;
+        } else {
+            return null;
+        }
+
+        if (typeof tileData === "string") {
+            tileData = JSON.parse(tileData);
+        }
+        
+        return tileData;
+    } catch (error) {
+        console.error("Error fetching tile data:", error);
+        throw error;
+    } finally {
+        client.release();
+    }
+};
+
+export const saveTileData = async (teamName, compId, updatedTiles) => {
+    const client = await pool.connect();
+    try {
+        const result = await client.query(
+            `SELECT team_one_name, team_two_name
+             FROM battleship_bingo 
+             WHERE competition_id = $1`,
+            [compId]
+        );
+
+        if (result.rows.length === 0) {
+            return { success: false, error: "Competition not found." };
+        }
+
+        const { team_one_name, team_two_name } = result.rows[0];
+
+        // Figure out which column we need to update
+        let columnToUpdate;
+        if (teamName === team_one_name) {
+            columnToUpdate = "team_one_tiles";
+        } else if (teamName === team_two_name) {
+            columnToUpdate = "team_two_tiles";
+        } else {
+            return { success: false, error: "Team name not found in this competition." };
+        }
+
+        const tilesJSON = JSON.stringify(updatedTiles);
+
+        await client.query(
+            `UPDATE battleship_bingo 
+             SET ${columnToUpdate} = $1 
+             WHERE competition_id = $2`,
+            [tilesJSON, compId]
+        );
+
+        return { success: true };
+    } catch (error) {
+        console.error("Error saving tile data:", error);
+        return { success: false, error: error.message };
+    } finally {
+        client.release();
+    }
+};
+
 export const getMaskedGameState = async (compId) => {
     const client = await pool.connect();
     try {
